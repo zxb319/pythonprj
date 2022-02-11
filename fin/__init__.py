@@ -24,5 +24,5 @@ def irr(cash_flow: List[float]):
 
 
 if __name__ == '__main__':
-    a = irr([-100, 20, 20, 20, 20])
+    a = irr([-100])
     print(a)
