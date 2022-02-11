@@ -21,3 +21,8 @@ def irr(cash_flow: List[float]):
         return pv(cash_flow, r)
 
     return root_binarily(inner, -1 + 1e-10, 1e10)
+
+
+if __name__ == '__main__':
+    a = irr([-100, 20, 20, 20, 20])
+    print(a)
