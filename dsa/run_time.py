@@ -4,6 +4,7 @@ import functools
 
 
 def run_time(c: Callable):
+    """打印出可执行对象的执行时间"""
     @functools.wraps(c)
     def inner(*args, **kwargs):
         start_time = time.time()
