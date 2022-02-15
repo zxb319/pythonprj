@@ -9,7 +9,7 @@ def ear(rs: float, m: int):
     :param m: compounded count per year
     :return: effective annual interest rate
     """
-    return (1 + rs / m) ** m
+    return (1 + rs / m) ** m-1
 
 
 def pv(cash_flow: List[float], r: float):
@@ -24,5 +24,9 @@ def irr(cash_flow: List[float]):
 
 
 if __name__ == '__main__':
-    a = irr([-100])
+    a = ear(12 / 100, 2)
+    print(a)
+    a = ear(12 / 100, 4)
+    print(a)
+    a = ear(12 / 100, 12)
     print(a)
