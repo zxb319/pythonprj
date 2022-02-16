@@ -55,9 +55,20 @@ class Fraction:
     def __eq__(self, other: "Fraction"):
         return self._num == other._num and self._denom == other._denom
 
+    def __pow__(self, power: int, modulo=None):
+        if power == 0:
+            return Fraction(1, 1)
+        if power < 0:
+            return Fraction(1, 1) / self ** (-power)
+
+        if power % 2 == 0:
+            return (self * self) ** (power // 2)
+
+        return self * self ** (power - 1)
+
 
 if __name__ == '__main__':
     f0 = Fraction(2, 4)
     f1 = Fraction(3, 9)
 
-    print(f0, f1, f0 <= f1)
+    print(f1*f0**10)
