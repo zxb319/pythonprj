@@ -44,9 +44,4 @@ def twr(hprs: List[float]):
 
 
 if __name__ == '__main__':
-    a=twr([1200/1000-1,2200/2000-1])
-
-    b=irr([-1000,-800,2200])
-
-    print(a)
-    print(b)
+    print()
