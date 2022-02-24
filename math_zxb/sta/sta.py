@@ -45,8 +45,23 @@ def kurtosis(elems: List[float]):
     return sum((x - m) ** 4 for x in elems) / (len(elems) - 1) / std(elems) ** 4 - 3
 
 
+def A(n: int, m: int):
+    res = 1
+    for i in range(m):
+        res *= n - i
+    return res
+
+
+def C(n: int, m: int):
+    return A(n, m) / A(m, m)
+
+
 if __name__ == '__main__':
-    a = [5, 8, 1, 2, 4]
-    print(mean(a))
-    print(variance(a))
-    print(std(a))
+    res = 0
+    for i in range(12, 21):
+        a = C(20, i)
+        b = 4 ** (20 - i)
+        c = 5 ** 20
+        res += a * b / c
+
+    print(res)
