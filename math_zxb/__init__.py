@@ -2,7 +2,7 @@ from typing import Callable
 
 
 def integral(func: Callable[[float], float], lo: float, hi: float):
-    n = 10_0000
+    n = 1_0000
     delta = (hi - lo) / n
     res = 0
     for i in range(n):
