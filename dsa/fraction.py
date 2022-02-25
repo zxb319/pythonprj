@@ -66,6 +66,9 @@ class Fraction:
 
         return self * self ** (power - 1)
 
+    def __float__(self):
+        return self._num/self._denom
+
 
 if __name__ == '__main__':
     f0 = Fraction(2, 4)

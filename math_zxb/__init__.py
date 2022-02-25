@@ -1,6 +1,16 @@
 from typing import Callable
 
 
+def integral(func: Callable[[float], float], lo: float, hi: float):
+    n = 10_0000
+    delta = (hi - lo) / n
+    res = 0
+    for i in range(n):
+        res += (func(lo + delta * (i))+func(lo + delta * (i+1)))/2 * delta
+
+    return res
+
+
 def root_binarily(func: Callable[[float], float], lo: float, hi: float):
     if lo > hi:
         raise ArithmeticError("lo<=hi is must.")
@@ -22,6 +32,6 @@ def root_binarily(func: Callable[[float], float], lo: float, hi: float):
 
 
 if __name__ == '__main__':
-    f = lambda x: x**3+x**2+x - 200
+    f = lambda x: x ** 3 + x ** 2 + x - 200
     print(root_binarily(f, 0.1, 100_0000))
     print(2 ** (1 / 3))
