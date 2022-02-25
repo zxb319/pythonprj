@@ -74,8 +74,8 @@ class _Term:
 
 
 if __name__ == '__main__':
-    a = _Term(1, 9, 2)
-    b = _Term(1, 9, 2)
+    a = _Term(1, 9, 1)
+    b = _Term(1, 9, 1)
 
     print(a * b)
     # print(factors(18))
