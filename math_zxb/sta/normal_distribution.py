@@ -36,8 +36,4 @@ if __name__ == '__main__':
     a = root_binarily(lambda x: pd.cp(x) - 0.0110, -100, 100)
     print(a)
 
-    pd = NormalDistribution(10, 2)
-    print(pd.pbetween(11, 13.6))
-
-    pd = NormalDistribution(38.5, 2.5)
-    print(1 - pd.pbetween(36, 40))
+    print(pd.cp(-2.29))
