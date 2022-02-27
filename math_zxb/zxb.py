@@ -117,7 +117,6 @@ def cosine(x: float):
         term *= -1
         i += 2
 
-
 def arcsine(x: float):
     def f(r: float):
         return sine(r) - x
