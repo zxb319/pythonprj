@@ -20,15 +20,17 @@ def root_binarily(func: Callable[[float], float], lo: float, hi: float):
     if flo * fhi > 0:
         raise ArithmeticError(f"func(lo)*func(hi)<=0 is must.lo={lo},hi={hi}")
 
-    mi = (lo + hi) / 2
-    if mi in (lo, hi):
-        return hi
+    while True:
+        mi = (lo + hi) / 2
+        if mi in (lo, hi):
+            return hi
 
-    fmi = func(mi)
-    if flo * fmi <= 0:
-        return root_binarily(func, lo, mi)
-    else:
-        return root_binarily(func, mi, hi)
+        fmi = func(mi)
+        if flo * fmi <= 0:
+            hi=mi
+        else:
+            lo=mi
+            flo=fmi
 
 
 if __name__ == '__main__':
