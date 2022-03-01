@@ -29,11 +29,5 @@ class NormalDistribution:
 
 
 if __name__ == '__main__':
-    pd = NormalDistribution(0, 1)
-
-    from math_zxb import root_binarily
-
-    a = root_binarily(lambda x: pd.cp(x) - 0.0110, -100, 100)
-    print(a)
-
-    print(pd.cp(-2.29))
+    pd = NormalDistribution(30, 2/6)
+    print(pd.cp(28))
