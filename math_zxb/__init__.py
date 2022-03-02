@@ -1,12 +1,17 @@
 from typing import Callable
 
 
+def differential(f: Callable[[float], float], x: float):
+    delta = 0.0000001
+    return (f(x + delta) - f(x)) / delta
+
+
 def integral(func: Callable[[float], float], lo: float, hi: float):
     n = 1_0000
     delta = (hi - lo) / n
     res = 0
     for i in range(n):
-        res += (func(lo + delta * (i))+func(lo + delta * (i+1)))/2 * delta
+        res += (func(lo + delta * (i)) + func(lo + delta * (i + 1))) / 2 * delta
 
     return res
 
@@ -18,6 +23,7 @@ def root_binarily(func: Callable[[float], float], lo: float, hi: float):
     flo = func(lo)
     fhi = func(hi)
     if flo * fhi > 0:
+        print(lo,flo,hi,fhi)
         raise ArithmeticError(f"func(lo)*func(hi)<=0 is must.lo={lo},hi={hi}")
 
     while True:
@@ -27,13 +33,11 @@ def root_binarily(func: Callable[[float], float], lo: float, hi: float):
 
         fmi = func(mi)
         if flo * fmi <= 0:
-            hi=mi
+            hi = mi
         else:
-            lo=mi
-            flo=fmi
+            lo = mi
+            flo = fmi
 
 
 if __name__ == '__main__':
-    f = lambda x: x ** 3 + x ** 2 + x - 200
-    print(root_binarily(f, 0.1, 100_0000))
-    print(2 ** (1 / 3))
+    a=1

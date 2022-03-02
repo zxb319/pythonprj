@@ -132,5 +132,6 @@ def arccosine(x: float):
 
 
 if __name__ == '__main__':
-    a = arcsine(1)
-    print(a*2)
+    a=root_binarily(lambda x:1/x**2+1/x-1,1,2)
+    print(a)
+    print((5**0.5+1)/2)
