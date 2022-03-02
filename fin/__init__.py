@@ -43,5 +43,43 @@ def twr(hprs: List[float]):
     return reduce(lambda x, y: x * y, (1 + r for r in hprs), 1) ** (1 / len(hprs)) - 1
 
 
+def debx(present_value: float, r: float, n: int):
+    a = annuity(present_value, r, n)
+    res = []
+    for i in range(1, n + 1):
+        lx = present_value * r
+        bj = a - lx
+        present_value -= bj
+        res.append({
+            "期数": i,
+            "本期利息": lx,
+            "本期本金": bj,
+            "本期本息": a,
+            "剩余本金": present_value
+        })
+
+    return res
+
+
+def debj(present_value: float, r: float, n: int):
+    bj = present_value / n
+    res = []
+    for i in range(1, n + 1):
+        lx = present_value * r
+        a = bj + lx
+        present_value -= bj
+        res.append({
+            "期数": i,
+            "本期利息": lx,
+            "本期本金": bj,
+            "本期本息": a,
+            "剩余本金": present_value
+        })
+
+    return res
+
+
 if __name__ == '__main__':
-    print()
+    res = debx(100_0000, 4 / 100 / 12, 10 * 12)
+    for i in res:
+        print(i)
