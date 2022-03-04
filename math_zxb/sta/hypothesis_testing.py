@@ -1,4 +1,4 @@
-from math_zxb.sta import mean, std
+from math_zxb.sta import mean, std, corr
 from math_zxb.sta.distributions import Dist
 from math_zxb.sta.f_distribution import FDistribution
 from math_zxb.sta.kai_distribution import KaiDistribution
@@ -63,20 +63,18 @@ def double_tail_test_sigma(n: int, s: float, sigma: float, alpha: float):
 
 
 if __name__ == '__main__':
-    xs1=[73,65,68,80,72,75,69,58,67,66,88]
+    xs=[300,400,500,500,800,1000,1000,1300]
+    ys=[9500,10300,11000,12000,12400,13400,14500,15300]
+    r=corr(xs,ys)
+    print(r)
 
-    s1=std(xs1)
-    n1=len(xs1)
+    t=r/((1-r**2)/(len(xs)-2))**0.5
 
-    xs2=[80,70,64,73,61,55,67,82,65,57,74]
+    print(t)
 
-    s2=std(xs2)
-    n2=len(xs2)
+    pd=TDistribution(len(xs)-2)
 
-    pd=FDistribution(n1-1,n2-1)
+    print(pd.range_of(0.99))
+    pvalue=1-pd.pbetween(-t,t)
 
-    f=s1**2/s2**2
-
-    lo,hi=pd.range_of(0.95)
-
-    print(lo,hi,f)
+    print(pvalue)

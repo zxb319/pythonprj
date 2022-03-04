@@ -47,9 +47,17 @@ def kurtosis(elems: List[float]):
     m = mean(elems)
     return sum((x - m) ** 4 for x in elems) / (len(elems) - 1) / std(elems) ** 4 - 3
 
+def corr(xs:List[float],ys:List[float]):
+    x_bar = mean(xs)
+    y_bar = mean(ys)
+
+    a=sum((x-x_bar)*(y-y_bar) for x,y in zip(xs,ys))
+    b=sum((x-x_bar)**2 for x in xs)
+    c=sum((y-y_bar)**2 for y in ys)
+    return a/(b*c)**0.5
 
 def A(n: int, m: int):
-    if m>n:
+    if m > n:
         return 0
 
     res = 1
@@ -63,11 +71,6 @@ def C(n: int, m: int):
 
 
 if __name__ == '__main__':
-    res = 0
-    for i in range(12, 21):
-        a = C(20, i)
-        b = 4 ** (20 - i)
-        c = 5 ** 20
-        res += a * b / c
-
-    print(res)
+    xs=[300,400,500,500,800,1000,1000,1300]
+    ys=[9500,10300,11000,12000,12400,13400,14500,15300]
+    print(corr(xs,ys))

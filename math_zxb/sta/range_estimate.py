@@ -43,5 +43,11 @@ def sample_size_estimate_for_diff_p(h: float, p1: float, p2: float, p: float):
 
 
 if __name__ == '__main__':
-    a = sample_size_estimate_for_diff_p(0.005,0.03,0.03,0.95)
-    print(a)
+    s=(55.5/300)**0.5
+    pd=TDistribution(23)
+    lo,hi=pd.range_of(0.95)
+    print(lo,hi)
+    res=(7-hi*s,7-lo*s)
+
+    print(res)
+
