@@ -14,6 +14,13 @@ class PoissonDistribution:
             raise ArithmeticError("x must >=0")
         return self._lambda ** x * math.e ** (-self._lambda) / A(x, x)
 
+    @property
+    def miu(self):
+        return self._lambda
+
+    @property
+    def sigma(self):
+        return self._lambda**0.5
 
 if __name__ == '__main__':
     pd = PoissonDistribution(0.05*20)

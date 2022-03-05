@@ -43,6 +43,11 @@ class NormalDistribution(Dist):
         res = math_zxb.root_binarily(f, self._miu - 100 * self._sigma, self._miu + 100 * self._sigma)
         return self._miu - res, self._miu + res
 
+    def miu(self):
+        return self._miu
+
+    def sigma(self):
+        return self._sigma
 
 if __name__ == '__main__':
     pd = NormalDistribution(0, 1)

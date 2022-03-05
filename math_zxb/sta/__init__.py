@@ -3,6 +3,7 @@ from collections import Counter
 from typing import List, Iterable
 
 import math_zxb
+from dsa.fraction import Fraction
 
 
 def mode(elems: Iterable[float]):
@@ -47,14 +48,16 @@ def kurtosis(elems: List[float]):
     m = mean(elems)
     return sum((x - m) ** 4 for x in elems) / (len(elems) - 1) / std(elems) ** 4 - 3
 
-def corr(xs:List[float],ys:List[float]):
+
+def corr(xs: List[float], ys: List[float]):
     x_bar = mean(xs)
     y_bar = mean(ys)
 
-    a=sum((x-x_bar)*(y-y_bar) for x,y in zip(xs,ys))
-    b=sum((x-x_bar)**2 for x in xs)
-    c=sum((y-y_bar)**2 for y in ys)
-    return a/(b*c)**0.5
+    a = sum((x - x_bar) * (y - y_bar) for x, y in zip(xs, ys))
+    b = sum((x - x_bar) ** 2 for x in xs)
+    c = sum((y - y_bar) ** 2 for y in ys)
+    return a / (b * c) ** 0.5
+
 
 def A(n: int, m: int):
     if m > n:
@@ -71,6 +74,9 @@ def C(n: int, m: int):
 
 
 if __name__ == '__main__':
-    xs=[300,400,500,500,800,1000,1000,1300]
-    ys=[9500,10300,11000,12000,12400,13400,14500,15300]
-    print(corr(xs,ys))
+    a=3**12*A(3,3)
+    b=3**15
+
+    f=Fraction(a,b)
+
+    print(f)

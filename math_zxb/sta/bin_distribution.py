@@ -20,6 +20,14 @@ class BinDistribution:
     def cp(self, x: int):
         return sum(self.p(i) for i in range(x + 1))
 
+    @property
+    def miu(self):
+        return self._n*self._p_success
+
+    @property
+    def sigma(self):
+        return (self.miu*(1-self._p_success))**0.5
+
 
 if __name__ == "__main__":
     bd = BinDistribution(5, 0.5)

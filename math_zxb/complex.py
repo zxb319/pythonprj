@@ -55,7 +55,19 @@ class Complex:
         length = power(abs(self), p)
         return Complex(length * cosine(arc), length * sine(arc))
 
+    def pow_root(self, p: int):
+        assert p > 1
+        res = []
+        length = abs(self) ** (1 / p)
+        arc = self.arc
+        for i in range(p):
+            carc = (arc + 2 * i * PI) / p
+            res.append(Complex(length * cosine(carc), length * sine(carc)))
+
+        return res
+
 
 if __name__ == '__main__':
-    c = Complex(-1, square_root(3))
-    print(c.arc / 2 / PI * 360)
+    c = Complex(-1, 1)
+    print(c.__pow__(-1))
+
