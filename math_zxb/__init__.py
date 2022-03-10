@@ -9,7 +9,7 @@ def differential(f: Callable[[float], float], x: float):
 
 
 def integral(func: Callable[[float], float], lo: float, hi: float):
-    n = 1_0000
+    n = 100_0000
     delta = (hi - lo) / n
     res = 0
     for i in range(n):
@@ -42,5 +42,6 @@ def root_binarily(func: Callable[[float], float], lo: float, hi: float):
 
 
 if __name__ == '__main__':
-    a=integral(lambda x:(1-x**2)**0.5,0,1)
-    print(4*a)
+    a=integral(lambda x:1/(1-x**2)**0.5,0,1-1e-10)
+    print(2*a)
+    print(a)
