@@ -47,12 +47,12 @@ class _Term:
                 base //= f ** c
                 int_part *= f ** (c // power)
 
-        if int_part==0 or base==0:
-            int_part=0
-            base=0
+        if int_part == 0 or base == 0:
+            int_part = 0
+            base = 0
 
-        if base in (0,1):
-            power=1
+        if base in (0, 1):
+            power = 1
 
         self._int_part = int_part
         self._base = base
@@ -67,12 +67,12 @@ class _Term:
     def __mul__(self, other: "_Term"):
         lcm_num = lcm(self._power, other._power)
 
-        int_part=self._int_part * other._int_part
-        base=self._base ** (lcm_num // self._power) * other._base ** (lcm_num // other._power)
+        int_part = self._int_part * other._int_part
+        base = self._base ** (lcm_num // self._power) * other._base ** (lcm_num // other._power)
 
-        return _Term(int_part,base,lcm_num)
+        return _Term(int_part, base, lcm_num)
 
 
 if __name__ == '__main__':
-    a=lcm(8,12)
+    a = lcm(8, 12)
     print(a)

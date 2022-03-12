@@ -80,6 +80,5 @@ def debj(present_value: float, r: float, n: int):
 
 
 if __name__ == '__main__':
-    res = debx(100_0000, 4 / 100 / 12, 10 * 12)
-    for i in res:
-        print(i)
+    a=time_value([0]+[1000 for i in range(240)],0.01,0)
+    print(a)
