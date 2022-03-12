@@ -1,5 +1,7 @@
 from typing import Callable
 
+import numba
+
 
 def differential(f: Callable[[float], float], x: float):
     delta = 0.0000001
@@ -7,11 +9,11 @@ def differential(f: Callable[[float], float], x: float):
 
 
 def integral(func: Callable[[float], float], lo: float, hi: float):
-    n = 1_0000
+    n = 100_0000
     delta = (hi - lo) / n
     res = 0
     for i in range(n):
-        res += (func(lo + delta * (i)) + func(lo + delta * (i + 1))) / 2 * delta
+        res += (func(lo + delta * (i)) + func(lo + delta * (i + 1))+4*func(lo+delta*(i+0.5))) / 6 * delta
 
     return res
 
@@ -40,4 +42,6 @@ def root_binarily(func: Callable[[float], float], lo: float, hi: float):
 
 
 if __name__ == '__main__':
-    a=1
+    a=integral(lambda x:1/(1-x**2)**0.5,0,1-1e-10)
+    print(2*a)
+    print(a)

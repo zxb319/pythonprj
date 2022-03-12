@@ -91,6 +91,7 @@ def logarithm(b: float, num: float):
 
 
 def sine(x: float):
+    x-=int(x/(2*PI))*2*PI
     res = 0
     i = 1
     term = x
@@ -105,6 +106,7 @@ def sine(x: float):
 
 
 def cosine(x: float):
+    x-=int(x/(2*PI))*2*PI
     res = 0
     i = 1
     term = 1
@@ -116,6 +118,7 @@ def cosine(x: float):
         term /= i * (i + 1)
         term *= -1
         i += 2
+
 
 def arcsine(x: float):
     def f(r: float):
@@ -132,6 +135,5 @@ def arccosine(x: float):
 
 
 if __name__ == '__main__':
-    a=root_binarily(lambda x:1/x**2+1/x-1,1,2)
+    a = sine(PI / 6)
     print(a)
-    print((5**0.5+1)/2)

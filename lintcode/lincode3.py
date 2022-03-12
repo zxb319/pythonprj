@@ -1,32 +1,26 @@
 from collections import Counter
+from typing import List
 
 
-class Solution:
-    """
-    @param k: An integer
-    @param n: An integer
-    @return: An integer denote the count of digit k in 1..n
-    """
+def max_profit(prices: List[float], fee: float):
+    status = {
+        0: 0,
+        1: -prices[0]
+    }
 
-    def digitCounts(self, k, n):
-        # write your code here
-        res = 0
-        for i in range(n + 1):
-            for d in self.digits(i):
-                if d == k:
-                    res += 1
+    for i in range(1, len(prices)):
+        cur = {}
+        for c, p in status.items():
+            if c == 0:
+                cur[1] = max(p - prices[i], status[1])
+            elif c == 1:
+                cur[0] = max(p + prices[i] - fee, status[0])
 
-        return res
+        status = cur
 
-    def digits(self, n):
-        res = []
-        while n > 0:
-            res.append(n % 10)
-            n //= 10
-
-        return res
+    return status[0]
 
 
 if __name__ == '__main__':
-    a = Solution().digitCounts(3, 12)
+    a = max_profit([1, 3, 2, 8, 4, 9], 2)
     print(a)
