@@ -15,6 +15,8 @@ def run_time(c: Callable):
     return inner
 
 
+
+
 if __name__ == '__main__':
     @run_time
     def ttt():
