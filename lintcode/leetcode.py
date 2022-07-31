@@ -6,299 +6,171 @@ import heapq
 import random
 import re
 from functools import cmp_to_key
-from typing import List
+from typing import List, Optional
 from collections import Counter, deque
 from math import sqrt
 from random import randint
 from collections import OrderedDict
 
 # from dsa.fraction import Fraction
-from leetcode import *
+from lintcode import *
 from dsa.heap import Heap
 
-
 class Solution:
-    def preorderTraversal(self, root: TreeNode) -> List[int]:
+    def editDistance(self , str1: str, str2: str) -> int:
         # write code here
-        return list(self.preorder(root))
+        cache={}
+        return self.edit_dist(str1,0,str2,0,cache)
 
-    def preorder(self,root: TreeNode):
-        if root:
-            yield root.val
-            yield from self.preorder(root.left)
-            yield from self.preorder(root.right)
+    def edit_dist(self,str1:str,idx1:int,str2:str,idx2:int,cache:dict):
+        if (idx1,idx2) in cache:
+            return cache[(idx1,idx2)]
+        if idx1>=len(str1):
+            return len(str2)-idx2
+        if idx2>=len(str2):
+            return len(str1)-idx1
 
-class Solution:
-    def printListFromTailToHead(self , listNode: ListNode) -> List[int]:
-        # write code here
-        res=deque()
-        while listNode is not None:
-            res.appendleft(listNode.val)
+        if str1[idx1]==str2[idx2]:
+            return self.edit_dist(str1,idx1+1,str2,idx2+1)
 
-        return res
-
-class Solution:
-    def __init__(self):
-        self._mp = {}
-
-    def Sum_Solution(self, n: int) -> int:
-        # write code here
-        if n in self._mp:
-            return self._mp[n]
-        if n == 0:
-            return 0
-        res = self.Sum_Solution(n - 1) + n
-        self._mp[n] = res
-        return res
-
-
-class Solution:
-    def __init__(self):
-        self._mp = {}
-
-    def jumpFloorII(self, number: int) -> int:
-        # write code here
-        if number in self._mp:
-            return self._mp[number]
-        if number == 0:
-            return 1
-        res = sum(self.jumpFloorII(i) for i in range(number))
-        self._mp[number] = res
-        return res
-
-
-class Solution:
-    def minNumberDisappeared(self, nums: List[int]) -> int:
-        # write code here
-        s = set(nums)
-        res = 1
-        while True:
-            if res not in s:
-                return res
-            res += 1
-
-
-class Solution:
-    """
-    @param moves: a sequence of its moves
-    @return: if this robot makes a circle
-    """
-    mp = {
-        'U': (0, 1),
-        'D': (0, -1),
-        'L': (-1, 0),
-        'R': (1, 0)
-    }
-
-    def judgeCircle(self, moves):
-        a = [self.mp[c] for c in moves]
-
-        x = sum(i[0] for i in a)
-        y = sum(i[1] for i in a)
-
-        return x == 0 and y == 0
-
-
-class Solution:
-    def Print(self, pRoot: TreeNode) -> List[List[int]]:
-
-        if not pRoot:
-            return []
-        # write code here
-        od = OrderedDict()
-        queue = deque()
-        queue.append((pRoot, 0))
-        while len(queue) > 0:
-            cur, depth = queue.popleft()
-            if depth in od:
-                od[depth].append(cur)
-            else:
-                od[depth] = [cur]
-            if cur.left:
-                queue.append((cur.left, depth + 1))
-            if cur.right:
-                queue.append((cur.right, depth + 1))
-
-        return [x for x in od.items()]
-
-
-class Solution:
-    coins = [1, 5, 10, 25]
-    res = []
-
-    def waysToChange(self, n: int) -> int:
-        if n < 0:
-            return 0
-        if n == 1:
-            return 1
-
-        if len(self.res) > n:
-            return self.res[n]
-
-        for i in range(len(self.res), n + 1):
-            rrr = 0
-            if i >= 1:
-                rrr += self.res[i - 1]
-            if i >= 5:
-                rrr += self.res[i - 5]
-            if i >= 10:
-                rrr += self.res[i - 10]
-            if i >= 25:
-                rrr += self.res[i - 25]
-            self.res.append(rrr)
-
-        return self.res[-1]
-
-
-class Solution:
-    def FirstNotRepeatingChar(self, str: str) -> int:
-        # write code here
-        mp = dict()
-        for i, c in enumerate(str):
-            mp[c] = i
-        od = OrderedDict()
-        for c in str:
-            od[c] = od.get(c, 0) + 1
-
-        for c, num in od.items():
-            if num == 1:
-                return mp[c]
-
-
-class Solution:
-    def Mirror(self, pRoot: TreeNode):
-        # write code here
-        if not pRoot:
-            return pRoot
-
-        a = self.Mirror(pRoot.left)
-        b = self.Mirror(pRoot.right)
-
-        pRoot.left = b
-        pRoot.right = a
-        return pRoot
-
-
-class Solution:
-    def GetNumberOfK(self, data: List[int], k: int) -> int:
-        # write code here
-        pos = self.find(data, k, 0, len(data)) - 1
-        res = 0
-        while pos >= 0 and data[pos] == k:
-            res += 1
-
-        return res
-
-    def find(self, data: List[int], k: int, lo: int, hi: int):
-        if lo >= hi:
-            return lo
-
-        mi = (lo + hi) // 2
-        if k < data[mi]:
-            return self.find(data, k, lo, mi)
         else:
-            return self.find(data, k, mi + 1, hi)
+            res1=self.edit_dist(str1,idx1,str2,idx2+1,cache)
+            res2=self.edit_dist(str1,idx1+1,str2,idx2,cache)
+            res3=self.edit_dist(str1,idx1+1,str2,idx2+1,cache)
+            res=min(res1,res2,res3)+1
+            cache[(idx1,idx2)]=res
+            return res
+
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        graph={}
+        for i,e in enumerate(equations):
+            if e[0] in graph:
+                graph[e[0]][e[1]]=values[i]
+            else:
+                graph[e[0]]={e[1]:values[i]}
+
+            if e[1] in graph:
+                graph[e[1]][e[0]] = 1/values[i]
+            else:
+                graph[e[1]] = {e[0]: 1/values[i]}
+        res=[]
+        for query in queries:
+            res.append(self.answer_query(graph,query[0],query[1],1))
+
+        return res
+
+    def answer_query(self,graph:dict,from_:str,to:str,cur:float):
+        if from_ not in graph:
+            return -1
+        if from_==to:
+            return cur
+        for mi,v in graph[from_].items():
+            rest=self.answer_query(graph,mi,to,cur*v)
+            if rest!=-1:
+                return rest
+
+        return -1
+
+class Solution:
+    def __init__(self):
+        self._cache={}
+    def uniquePaths(self, m: int, n: int) -> int:
+        if (m,n) in self._cache:
+            return self._cache[(m,n)]
+        if m==0 and n==0:
+            return 0
+        elif m==0 or n==0:
+            return 1
+        res=self.uniquePaths(m-1,n)+self.uniquePaths(m,n-1)
+        self._cache[(m,n)]=res
+        return res
+
+class Solution:
+    def __init__(self):
+        self._cache = {}
+
+    def jump(self, nums: List[int]) -> int:
+        return self.do_jump(nums, 0, len(nums))
+
+    def do_jump(self, nums: List, lo: int, hi: int):
+        if (lo, hi) in self._cache:
+            return self._cache[(lo, hi)]
+        if hi <= lo:
+            return 0
+        res = hi - lo
+        for i in range(1, nums[lo] + 1):
+            cur = 1 + self.do_jump(nums, lo + i, hi)
+            if res < cur:
+                res = cur
+        self._cache[(lo, hi)] = res
+        return res
 
 
 class Solution:
-    def solve(self, nums):
-        if all(x == 0 for x in nums):
-            return '0'
+    def constructMaximumBinaryTree(self, nums: List[int]) -> TreeNode:
+        return self.con(nums, 0, len(nums))
 
-        # write code here
-        def cmp(x: int, y: int):
-            a = str(x)
-            b = str(y)
-            return -int(a + b) + int(b + a)
-
-        a = sorted(nums, key=cmp_to_key(cmp))
-        return ''.join(str(x) for x in a)
+    def con(self, nums: List, lo: int, hi: int):
+        if hi <= lo:
+            return None
+        index, val = max(((i, nums[i]) for i in range(lo, hi)), key=lambda x: x[1])
+        left = self.con(nums, lo, index)
+        right = self.con(nums, index + 1, hi)
+        return TreeNode(val, left, right)
 
 
 class Solution:
-    def sortInList(self, head: ListNode):
-        # write code here
-        if not head:
-            return head
+    def lenLongestFibSubseq(self, arr: List[int]) -> int:
+        cache = []
+        return self.longest_fib(arr, cache)
 
-        l = []
-        cur = head
+    def longest_fib(self, arr: List[int], cache: List):
+        for a in arr:
+            cur = []
+            for seq in cache:
+                if len(seq) >= 2 and seq[-1] + seq[-2] == a:
+                    cur.append(seq + [a])
+                else:
+                    cur.append([seq[-1], a])
 
-        while cur:
-            l.append(cur)
-            cur = cur.next
+            cur.append([a])
+            cache.append(cur)
 
-        res = sorted(l, key=lambda node: node.val)
-
-        for i in range(0, len(l) - 1):
-            l[i].next = l[i + 1]
-
-        l[-1].next = None
-        return l[0]
-
-
-class Solution:
-    def longestCommonPrefix(self, strs):
-        # write code here
-        max_prefix_indx = 0
-        res = []
-        for c in strs[0]:
-            for s in strs[1:]:
-                if max_prefix_indx >= len(s):
-                    return ''.join(res)
-                if s[max_prefix_indx] != strs[0][max_prefix_indx]:
-                    return ''.join(res)
-            res.append(c)
-            max_prefix_indx += 1
-
-        return ''.join(res)
+        res = max(cache, key=lambda x: len(x))
+        return 0 if len(res) <= 2 else len(res)
 
 
 class Solution:
-    def KthNode(self, proot: TreeNode, k: int) -> int:
-        # write code here
-        for i, v in enumerate(self.mid_traverse(proot)):
-            if i == k - 1:
-                return v
+    def maxProduct(self, root: Optional[TreeNode]) -> int:
+        total_sum = self.sum(root)
+        res = 0
 
-    def mid_traverse(self, root: TreeNode):
+        def max_product(root: TreeNode):
+            nonlocal res
+            for node in self.mid_order(root):
+                left_sum = self.sum(node.left)
+                right_sum = self.sum(node.right)
+                cur = max(left_sum * (total_sum - left_sum), right_sum * (total_sum - right_sum))
+                if res < cur:
+                    res = cur
+
+        max_product(root)
+        return res % (10 ** 9 + 7)
+
+    def mid_order(self, root: TreeNode):
         if root:
-            if root.left:
-                yield from self.mid_traverse(root.left)
+            yield from self.mid_order(root.left)
+            yield root
+            yield from self.mid_order(root.right)
 
-            yield root.val
+    def sum(self, root: TreeNode):
+        if hasattr(root, 'sum'):
+            return root.sum
 
-            if root.right:
-                yield from self.mid_traverse(root.right)
+        if not root:
+            return 0
 
-
-class Solution:
-    def FindNumsAppearOnce(self, array):
-        # write code here
-        counter = Counter(array)
-        return list(k for k, v in counter.items() if v == 1)
-
-
-class Solution:
-    def topKstrings(self, strings: List[str], k: int):
-        # write code here
-        counter = Counter(strings)
-        heap = Heap(keyFunc=lambda x: (x[1], [-ord(c) for c in x[0]]))
-        for s, c in counter.items():
-            if len(heap) < k:
-                heap.push((s, c))
-            elif (-heap.top()[1], heap.top()[0]) > (c, s):
-                heap.pop()
-                heap.push((s, c))
-
-        res = []
-        while len(heap) > 0:
-            res.append(heap.pop())
-
-        return list(reversed(res))
-
-
-if __name__ == '__main__':
-    s = Solution()
-    a = s.topKstrings(["abcd", "abcd", "abcd", "pwb2", "abcd", "pwb2", "p12"], 3)
-    print(a)
+        res = root.val + self.sum(root.left) + self.sum(root.right)
+        root.sum = res
+        return res

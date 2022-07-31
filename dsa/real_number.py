@@ -37,42 +37,6 @@ def lcm(a: int, b: int):
     return res
 
 
-class _Term:
-    def __init__(self, int_part: int, base: int, power: int):
-
-        base_factors = factors(base)
-
-        for f, c in base_factors.items():
-            if c % power == 0:
-                base //= f ** c
-                int_part *= f ** (c // power)
-
-        if int_part == 0 or base == 0:
-            int_part = 0
-            base = 0
-
-        if base in (0, 1):
-            power = 1
-
-        self._int_part = int_part
-        self._base = base
-        self._power = power
-
-    def __str__(self):
-        return f"{self._int_part}*{self._power}√{self._base}"
-
-    def __neg__(self):
-        return _Term(-self._int_part, self._base, self._power)
-
-    def __mul__(self, other: "_Term"):
-        lcm_num = lcm(self._power, other._power)
-
-        int_part = self._int_part * other._int_part
-        base = self._base ** (lcm_num // self._power) * other._base ** (lcm_num // other._power)
-
-        return _Term(int_part, base, lcm_num)
-
-
 if __name__ == '__main__':
     a = lcm(8, 12)
     print(a)

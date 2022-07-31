@@ -7,22 +7,22 @@ class Heap:
     """
     默认最小堆
     """
-    __slots__ = {"__dat", "__keyFunc","__unique","__cache"}
+    __slots__ = {"__dat", "__keyFunc", "__unique", "__cache"}
 
-    def __init__(self, elems:Iterable=[],keyFunc:Callable=None,unique:bool=False):
+    def __init__(self, elems: Iterable = [], keyFunc: Callable = None, unique: bool = False):
         if keyFunc is None:
-            self.__keyFunc: Callable=lambda x:x
+            self.__keyFunc: Callable = lambda x: x
         else:
-            self.__keyFunc: Callable=keyFunc
+            self.__keyFunc: Callable = keyFunc
 
-        self.__unique=unique
+        self.__unique = unique
 
-        self.__cache=set()
+        self.__cache = set()
         if not self.__unique:
-            self.__dat:list=[(self.__keyFunc(x),x) for x in elems]
+            self.__dat: list = [(self.__keyFunc(x), x) for x in elems]
             heapq.heapify(self.__dat)
         else:
-            self.__dat: list =[]
+            self.__dat: list = []
             for val in elems:
                 if val not in self.__cache:
                     heapq.heappush(self.__dat, (self.__keyFunc(val), val))
@@ -31,7 +31,7 @@ class Heap:
     def top(self):
         return self.__dat[0][1]
 
-    def push(self,val:Any):
+    def push(self, val: Any):
         if self.__unique and val not in self.__cache or not self.__unique:
             heapq.heappush(self.__dat, (self.__keyFunc(val), val))
 
@@ -51,9 +51,9 @@ class Heap:
         return str(list(x[1] for x in self.__dat))
 
 
-if __name__=="__main__":
-    heap=Heap([1,2,3],keyFunc=lambda x:-x,unique=True)
+if __name__ == "__main__":
+    heap = Heap([1, 2, 3], keyFunc=lambda x: -x, unique=True)
     for i in reversed(range(10)):
-        heap.push(i*i)
+        heap.push(i * i)
 
     print(heap)

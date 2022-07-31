@@ -5,6 +5,7 @@ import functools
 
 def run_time(c: Callable):
     """打印出可执行对象的执行时间"""
+
     @functools.wraps(c)
     def inner(*args, **kwargs):
         start_time = time.time()
@@ -15,12 +16,10 @@ def run_time(c: Callable):
     return inner
 
 
-
-
 if __name__ == '__main__':
     @run_time
     def ttt():
-        sum(1 for i in range(10**8))
+        sum(1 for i in range(10 ** 8))
         return 1
 
 

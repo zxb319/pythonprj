@@ -46,21 +46,6 @@ def fib():
         yield f1
 
 
-def levelOrderTraverse(root: Node):
-    if root is not None:
-        queue: deque[Tuple[Node, int]] = deque()
-        queue.append((root, 0))
-        while len(queue) > 0:
-            (curNode, curLevel) = queue.popleft()
-            yield curNode, curLevel
-            if curNode is None:
-                continue
-            for node in curNode.children:
-                if node is None:
-                    continue
-                queue.append((node, curLevel + 1))
-
-
 def inorder(root: TreeNode):
     if root.left:
         yield from inorder(root.left)
@@ -96,4 +81,4 @@ def isPrime(num: int) -> bool:
 
 
 if __name__ == "__main__":
-    print(sin(3.1415926 / 3 * 2))
+    print(cos(3.1415926 / 1 * 2))
