@@ -10,7 +10,7 @@ def run_time(c: Callable):
     def inner(*args, **kwargs):
         start_time = time.time()
         res = c(*args, **kwargs)
-        print(f"{c}的执行时间:{time.time() - start_time}s")
+        print(f"{c}的执行时间:{time.time() - start_time}s,args({args},{kwargs})")
         return res
 
     return inner

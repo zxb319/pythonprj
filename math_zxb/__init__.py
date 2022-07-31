@@ -47,8 +47,8 @@ def root_binarily(func: Callable[[float], float], lo: float, hi: float):
 
 @dsa.run_time.run_time
 def particle_swarm_optimize(func:Callable,start_area):
-    particles_count=10000
-    iteration_count=100
+    particles_count=int(10000*(start_area[0][1]-start_area[0][0]))
+    iteration_count=1000
     positions=[[x[0]+random.random()*(x[1]-x[0]) for x in start_area] for i in range(particles_count)]
     local_optimimals=[p for p in positions]
     global_optimal=min(local_optimimals,key=lambda x:func(x))
@@ -60,16 +60,31 @@ def particle_swarm_optimize(func:Callable,start_area):
         positions=[[ppi+speedi for ppi,speedi in zip(pp,speed)] for pp,speed in zip(positions,speeds)]
 
         local_optimimals=[min((lo,pp),key=lambda x:func(x)) for lo,pp in zip(local_optimimals,positions)]
+        pre_global_optimal=global_optimal
         global_optimal=min(local_optimimals,key=lambda x:func(x))
 
-    return global_optimal
+        if abs(func(global_optimal)/func(pre_global_optimal)-1)<1e-20 and i>1:
+            return global_optimal,func(global_optimal),i
+
+        # len_preg=sum(x*x for x in pre_global_optimal)**0.5
+        # len_g=sum(x*x for x in global_optimal)**0.5
+        # if abs(len_g/len_preg-1)<1e-100 and i>10:
+        #     return global_optimal,func(global_optimal),i
+
+    return global_optimal,func(global_optimal),iteration_count
 
 
 if __name__ == '__main__':
 
     def f5(x):
-        if sum(a*a for a in x)>8:
-            return math.inf
-        return -sum(a*b for a,b in zip(x,[1,1]))
-    res=particle_swarm_optimize(f5,[[0,1]]*2)
+        # if sum(x)>3 or sum(a*b for a,b in zip(x,[1,4,7]))>9 or any(xi<0 for xi in x):
+        #     return math.inf
+        return (x[0]-1)**2+(x[1]-2)**2+x[2]**2
+
+    def ff(x):
+        return math.cos(x[0])
+
+
+    res = particle_swarm_optimize(f5, [[0, 3]] * 3)
+    # res=particle_swarm_optimize(ff,[[1,4]]*1)
     print(res)
