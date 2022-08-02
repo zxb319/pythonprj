@@ -109,11 +109,7 @@ def work_time(from_time: str, to_time: str):
     return (to_time - from_time) / 3600 - rest_hour
 
 
-def compute():
-    id = input('请输入中软工号： ')
-    pwd = getpass.getpass('请输入密码：')
-    month = input('请输入月份(如2022-07)：')
-
+def compute(id, pwd, month):
     records = get_work_time_details(id, pwd, month=month)
 
     data = {}
@@ -131,13 +127,24 @@ def compute():
     print('总工时: ', total_work_time)
     print('平均工时: ', average_work_time)
     if lack_time < 0:
-        print('超出标准工时: ', -lack_time)
+        print(f'超出标准工时: {-lack_time}小时,即{-lack_time * 60}分')
     else:
-        print('缺工时: ', lack_time)
-    # for k,v in data.items():
-    #     print(k,v,daily_work_times[k])
-    input('按enter键结束...')
+        print(f'缺工时: {lack_time}小时,即{lack_time * 60}分')
+
+    lack_time += days_count * 0.5
+    if lack_time > 0:
+        print(f'平均工时要达到8.5，缺工时: {lack_time}小时,即{lack_time * 60}分')
 
 
 if __name__ == '__main__':
-    compute()
+    id = ''
+    pwd = ''
+    if not id:
+        id = input('请输入中软工号：')
+    if not pwd:
+        pwd = getpass.getpass('请输入密码：')
+    month = input('请输入月份(格式YYYY-MM,不输入的话，默认当前月)：')
+    if not month:
+        month = time.strftime('%Y-%m', time.localtime())
+    compute(id, pwd, month)
+    input('按enter键结束...')
