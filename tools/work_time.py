@@ -134,6 +134,8 @@ def compute(id, pwd, month):
     lack_time += days_count * 0.5
     if lack_time > 0:
         print(f'平均工时要达到8.5，缺工时: {lack_time}小时,即{lack_time * 60}分')
+    else:
+        print(f'已满足8.5，且超过: {-lack_time}小时,即{-lack_time * 60}分')
 
 
 if __name__ == '__main__':
