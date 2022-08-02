@@ -137,8 +137,9 @@ def compute(id, pwd, month):
 
 
 if __name__ == '__main__':
-    id = ''
-    pwd = ''
+    import mima
+    id = mima.id
+    pwd = mima.pwd
     if not id:
         id = input('请输入中软工号：')
     if not pwd:
