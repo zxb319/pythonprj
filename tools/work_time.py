@@ -124,6 +124,8 @@ def compute(id, pwd, month):
     average_work_time = total_work_time / days_count
     lack_time = days_count * 8 - total_work_time
 
+    print('*'*60)
+    print(f'{month}的数据：')
     print('总工时: ', total_work_time)
     print('平均工时: ', average_work_time)
     if lack_time < 0:
@@ -136,6 +138,7 @@ def compute(id, pwd, month):
         print(f'平均工时要达到8.5，缺工时: {lack_time}小时,即{lack_time * 60}分')
     else:
         print(f'已满足8.5，且超过: {-lack_time}小时,即{-lack_time * 60}分')
+    print('*' * 60)
 
 
 if __name__ == '__main__':
