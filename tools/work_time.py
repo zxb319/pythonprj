@@ -6,7 +6,7 @@ import time
 import requests
 
 
-def get_work_time_details(user_id, user_password, month):
+def get_work_time_details(user_id, user_password, months):
     session = requests.Session()
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36 Edg/103.0.1264.71',
@@ -54,12 +54,16 @@ def get_work_time_details(user_id, user_password, month):
     url = 'http://ics.chinasoftinc.com:8010/ehr_saas/web/icssAttEmpDetail/getLocSetDataByPage.empweb'
     headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
     headers['token'] = token
-    data = f'pageIndex=1&pageSize=100&search=%7B%22dt%22%3A%22{month}%22%7D'
-    res = session.post(url=url, data=data, headers=headers)
 
-    res = json.loads(res.text)
-    records = res.get('result').get('data').get('page').get('items')
-    return records
+    months_records = {}
+    for month in months:
+        data = f'pageIndex=1&pageSize=100&search=%7B%22dt%22%3A%22{month}%22%7D'
+        res = session.post(url=url, data=data, headers=headers)
+        res = json.loads(res.text)
+        records = res.get('result').get('data').get('page').get('items')
+        months_records[month] = records
+
+    return months_records
 
 
 format_str = '%Y-%m-%d %H:%M:%S'
@@ -109,9 +113,7 @@ def work_time(from_time: str, to_time: str):
     return (to_time - from_time) / 3600 - rest_hour
 
 
-def compute(id, pwd, month):
-    records = get_work_time_details(id, pwd, month=month)
-
+def compute(records):
     data = {}
     today = time.strftime('%Y-%m-%d', time.localtime())
     for r in records:
@@ -121,11 +123,14 @@ def compute(id, pwd, month):
     daily_work_times = {k: work_time(min(v), max(v)) for k, v in data.items() if not (k == today and len(v) == 1)}
     total_work_time = sum(v for k, v in daily_work_times.items())
     days_count = len(daily_work_times)
+    if days_count==0:
+        return
     average_work_time = total_work_time / days_count
     lack_time = days_count * 8 - total_work_time
 
-    print('*'*60)
-    print(f'{month}的数据：')
+    print('*' * 60)
+    print(f'{records[0]["dt"][:7]}的数据：')
+    print(f'出勤天数：{days_count}')
     print('总工时: ', total_work_time)
     print('平均工时: ', average_work_time)
     if lack_time < 0:
@@ -143,6 +148,7 @@ def compute(id, pwd, month):
 
 if __name__ == '__main__':
     import mima
+
     id = mima.id
     pwd = mima.pwd
     if not id:
@@ -150,7 +156,23 @@ if __name__ == '__main__':
     if not pwd:
         pwd = getpass.getpass('请输入密码：')
     month = input('请输入月份(格式YYYY-MM,不输入的话，默认当前月)：')
-    if not month:
-        month = time.strftime('%Y-%m', time.localtime())
-    compute(id, pwd, month)
+    if month:
+        months = re.split(r'[,\s]+', month)
+    else:
+        today = time.localtime()
+        month = time.strftime('%Y-%m', today)
+        int_month = int(month[-2:])
+        int_year = int(month[:4])
+        if int_month == 1:
+            int_month = 12
+            int_year -= 1
+        else:
+            int_month -= 1
+        last_month = str(int_year) + '-' + (str(int_month) if int_month >= 10 else ('0' + str(int_month)))
+        months = [last_month, month]
+
+    months_records = get_work_time_details(id, pwd, months)
+    for _, records in months_records.items():
+        compute(records)
+
     input('按enter键结束...')
