@@ -135,5 +135,5 @@ def arccosine(x: float):
 
 
 if __name__ == '__main__':
-    a = sine(PI / 6)
-    print(a)
+    a = arccosine(0)
+    print(a*2)

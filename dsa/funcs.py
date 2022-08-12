@@ -1,29 +1,49 @@
-from collections import deque
-from typing import Tuple, Union
-
-from lintcode import *
-
 import os
 
 
-def sin(rad: Union[int, float]):
-    xp = rad
-    div = 1
-    res = 0
-    for i in range(30):
-        res += xp / div
-        xp = xp * (-1) * rad * rad
-        div = div * (2 * i + 2) * (2 * i + 3)
+def factors(num: int):
+    if num < 0:
+        raise ArithmeticError("num must >0")
+
+    if num <= 1:
+        return {num: 1}
+
+    res = {}
+    while num > 1:
+        f = 2
+        while f <= num:
+            if num % f == 0:
+                res[f] = res.get(f, 0) + 1
+                num //= f
+                break
+
+            f += 1
 
     return res
 
 
-def wanderFiles(dir: str, name: str, depth: int):
-    print(" " * 4 * depth, name, sep="")
-    if os.path.isdir(dir + name):
-        paths = os.listdir(dir + name)
-        for path in paths:
-            wanderFiles(dir + name + "/", path, depth + 1)
+def lcm(a: int, b: int):
+    """最小公倍数"""
+    afs = factors(a)
+    bfs = factors(b)
+    for f, c in bfs.items():
+        if f not in afs or afs[f] < c:
+            afs[f] = c
+
+    res = 1
+    for f, c in afs.items():
+        res *= f ** c
+
+    return res
+
+
+def wanderFiles(dir: str, depth: int):
+    files=os.listdir(dir)
+    for f in files:
+        file=os.path.join(dir,f)
+        print(f'{"    "*depth}{f}')
+        if os.path.isdir(file):
+            wanderFiles(file,depth+1)
 
 
 def gcd(a: int, b: int) -> int:
@@ -46,30 +66,6 @@ def fib():
         yield f1
 
 
-def inorder(root: TreeNode):
-    if root.left:
-        yield from inorder(root.left)
-    yield root
-    if root.right:
-        yield from inorder(root.right)
-
-
-def preorder(root: TreeNode):
-    yield root
-    if root.left:
-        yield from preorder(root.left)
-    if root.right:
-        yield from preorder(root.right)
-
-
-def postorder(root: TreeNode):
-    if root.left:
-        yield from postorder(root.left)
-    if root.right:
-        yield from postorder(root.right)
-    yield root
-
-
 def isPrime(num: int) -> bool:
     if num < 2: return False
     i = 2
@@ -81,4 +77,7 @@ def isPrime(num: int) -> bool:
 
 
 if __name__ == "__main__":
-    print(cos(3.1415926 / 1 * 2))
+    dir=os.path.abspath(__file__)
+    dir=os.path.dirname(dir)
+    dir=os.path.dirname(dir)
+    wanderFiles(dir,0)

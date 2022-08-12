@@ -143,6 +143,12 @@ def compute(records):
         print(f'平均工时要达到8.5，缺工时: {lack_time}小时,即{lack_time * 60}分')
     else:
         print(f'已满足8.5，且超过: {-lack_time}小时,即{-lack_time * 60}分')
+
+    exception_data=[(k,v) for k,v in data.items() if min(v)[-8:]>'09:00:00' or max(v)[-8:]<'17:30:00' and today!=k]
+    if len(exception_data)>0:
+        print(f'异常打卡：')
+        for ed in exception_data:
+            print(ed)
     print('*' * 60)
 
 
@@ -161,15 +167,7 @@ if __name__ == '__main__':
     else:
         today = time.localtime()
         month = time.strftime('%Y-%m', today)
-        int_month = int(month[-2:])
-        int_year = int(month[:4])
-        if int_month == 1:
-            int_month = 12
-            int_year -= 1
-        else:
-            int_month -= 1
-        last_month = str(int_year) + '-' + (str(int_month) if int_month >= 10 else ('0' + str(int_month)))
-        months = [last_month, month]
+        months = [month]
 
     months_records = get_work_time_details(id, pwd, months)
     for _, records in months_records.items():
