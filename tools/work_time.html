@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>工时计算</title>
+</head>
+<body>
+<script>
+    function get_work_time_details(user_id,user_password,months){
+        let xhr=new XMLHttpRequest()
+        let url="http://ics.chinasoftinc.com/r1portal/login"
+        let data=new FormData()
+        data.append('userName',user_id)
+        data.append('j_username',user_id)
+        data.append('password',user_password)
+        data.append('j_password',user_password)
+
+        xhr.open('POST',url,false)
+        // xhr.setRequestHeader('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36 Edg/103.0.1264.71')
+        xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded")
+        xhr.setRequestHeader("Referer","")
+        xhr.send(data)
+        console.log(url)
+        console.log(xhr.responseText)
+
+    }
+
+    get_work_time_details("335524","gbbscsyrrd319!",["2022-08"])
+</script>
+</body>
+</html>

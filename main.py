@@ -1,7 +1,3 @@
 
-b=[[1,2,3]]*3
-
-
-b[0][0]=20
-
-print(b)
+a=set()
+a.intersection()

@@ -134,15 +134,15 @@ def compute(records):
     print('总工时: ', total_work_time)
     print('平均工时: ', average_work_time)
     if lack_time < 0:
-        print(f'超出标准工时: {-lack_time}小时,即{-lack_time * 60}分')
+        print(f'超出标准工时: {-lack_time} 小时,即 {-lack_time * 60} 分')
     else:
-        print(f'缺工时: {lack_time}小时,即{lack_time * 60}分')
+        print(f'缺工时: {lack_time} 小时,即 {lack_time * 60} 分')
 
     lack_time += days_count * 0.5
     if lack_time > 0:
-        print(f'平均工时要达到8.5，缺工时: {lack_time}小时,即{lack_time * 60}分')
+        print(f'平均工时要达到8.5，缺工时: {lack_time} 小时,即 {lack_time * 60} 分')
     else:
-        print(f'已满足8.5，且超过: {-lack_time}小时,即{-lack_time * 60}分')
+        print(f'已满足8.5，且超过: {-lack_time} 小时,即 {-lack_time * 60} 分')
 
     exception_data=[(k,v) for k,v in data.items() if min(v)[-8:]>'09:00:00' or max(v)[-8:]<'17:30:00' and today!=k]
     if len(exception_data)>0:
