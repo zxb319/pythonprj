@@ -36,5 +36,3 @@ class EnIterable:
 
     def __iter__(self):
         return (x for x in self.__inputs)
-
-

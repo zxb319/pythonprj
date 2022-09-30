@@ -38,12 +38,12 @@ def lcm(a: int, b: int):
 
 
 def wanderFiles(dir: str, depth: int):
-    files=os.listdir(dir)
+    files = os.listdir(dir)
     for f in files:
-        file=os.path.join(dir,f)
-        print(f'{"    "*depth}{f}')
+        file = os.path.join(dir, f)
+        print(f'{"    " * depth}{f}')
         if os.path.isdir(file):
-            wanderFiles(file,depth+1)
+            wanderFiles(file, depth + 1)
 
 
 def gcd(a: int, b: int) -> int:
@@ -77,7 +77,5 @@ def isPrime(num: int) -> bool:
 
 
 if __name__ == "__main__":
-    dir=os.path.abspath(__file__)
-    dir=os.path.dirname(dir)
-    dir=os.path.dirname(dir)
-    wanderFiles(dir,0)
+    a = lcm(3, 12)
+    print(a)

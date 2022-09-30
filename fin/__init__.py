@@ -44,6 +44,7 @@ def twr(hprs: List[float]):
 
 
 def debx(present_value: float, r: float, n: int):
+    """等额本息"""
     a = annuity(present_value, r, n)
     res = []
     for i in range(1, n + 1):

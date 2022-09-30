@@ -1,29 +1,22 @@
+import copy
 from typing import List
-import heapq
 
 
 class Solution:
-    def __init__(self):
-        self._pq = []
-        heapq.heappush(self._pq, 1)
-        self._cache=set()
+    def findMaxLength(self, nums: List[int]) -> int:
+        res=[1 if nums[0]==1 else -1]
+        for i in range(1,len(nums)):
+            c=nums[i]
+            
 
-    def nthSuperUglyNumber(self, n: int, primes: List[int]) -> int:
-        if n == 1:
-            return heapq.heappop(self._pq)
-        else:
-            cur = heapq.heappop(self._pq)
-            for p in primes:
-                curp=cur*p
-                if curp in self._cache:
-                    continue
-                heapq.heappush(self._pq, curp)
-                self._cache.add(curp)
+class Solution:
+    def longestWPI(self, hours: List[int]) -> int:
+        lwpi=[1 if hours[0]>8 else -1]
+        for i in range(1,len(hours)):
+            h=hours[i]
+            c=1 if h>8 else -1
+            lwpi.append(max(lwpi[-1],0)+c)
 
-            return self.nthSuperUglyNumber(n - 1, primes)
+        return max(max(lwpi),0)
 
 
-if __name__ == '__main__':
-    s = Solution()
-    res = s.nthSuperUglyNumber(12, [2, 7, 13, 19])
-    print(res)

@@ -1,4 +1,3 @@
-
 def get_subway_info(file_path):
     edges = []
     station_line_map = {}
@@ -34,15 +33,15 @@ def add_line_info_for_path(path, station_line_map):
 if __name__ == '__main__':
     edges, station_line_map = get_subway_info('subway_info')
     from dsa.graph import Graph
-    g = Graph(edges,is_undirected=True)
+
+    g = Graph(edges, is_undirected=True)
 
     # for e,v in g._neighbours.items():
     #     print(e,v)
 
-    min_dist, path = g.shortest_path('金运路', '上海动物园')
+    min_dist, path = g.shortest_path('金运路', '浦电路')
 
     res = add_line_info_for_path(path, station_line_map)
     for r in res:
         print(*r)
     print(min_dist)
-

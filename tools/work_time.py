@@ -1,16 +1,37 @@
+import datetime
 import getpass
 import json
+import os.path
 import re
 import time
 
 import requests
 
+except_holidays = {
+    '2022-09-12',
+    '2022-10-03',
+    '2022-10-04',
+    '2022-10-05',
+    '2022-10-06',
+    '2022-10-07',
+}
 
-def get_work_time_details(user_id, user_password, months):
+except_workdays = {
+    '2022-10-08',
+    '2022-10-09',
+}
+
+date_format_str = '%Y-%m-%d'
+
+
+def is_workday(d):
+    return datetime.datetime.strptime(d, date_format_str).weekday() in (0, 1, 2, 3, 4) and d not in except_holidays or d in except_workdays
+
+
+def get_token(user_id, user_password):
     session = requests.Session()
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36 Edg/103.0.1264.71',
-
     }
     data = {
         'userName': user_id,
@@ -51,10 +72,13 @@ def get_work_time_details(user_id, user_password, months):
     res = json.loads(res.text)
     token = res.get('result').get('data').get('token')
 
+    headers['token'] = token
+    return session, headers
+
+
+def get_work_time_details(session, headers, months):
     url = 'http://ics.chinasoftinc.com:8010/ehr_saas/web/icssAttEmpDetail/getLocSetDataByPage.empweb'
     headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-    headers['token'] = token
-
     months_records = {}
     for month in months:
         data = f'pageIndex=1&pageSize=100&search=%7B%22dt%22%3A%22{month}%22%7D'
@@ -123,13 +147,15 @@ def compute(records):
     daily_work_times = {k: work_time(min(v), max(v)) for k, v in data.items() if not (k == today and len(v) == 1)}
     total_work_time = sum(v for k, v in daily_work_times.items())
     days_count = len(daily_work_times)
-    if days_count==0:
+    if days_count == 0:
+        print('没有数据！')
         return
     average_work_time = total_work_time / days_count
     lack_time = days_count * 8 - total_work_time
 
-    print('*' * 60)
-    print(f'{records[0]["dt"][:7]}的数据：')
+    print('*' * 80)
+    cur_month = records[0]["dt"][:7]
+    print(f'{cur_month}的数据：')
     print(f'出勤天数：{days_count}')
     print('总工时: ', total_work_time)
     print('平均工时: ', average_work_time)
@@ -144,33 +170,119 @@ def compute(records):
     else:
         print(f'已满足8.5，且超过: {-lack_time} 小时,即 {-lack_time * 60} 分')
 
-    exception_data=[(k,v) for k,v in data.items() if min(v)[-8:]>'09:00:00' or max(v)[-8:]<'17:30:00' and today!=k]
-    if len(exception_data)>0:
+    exception_data = [(k, v) for k, v in data.items() if min(v)[-8:] > '09:00:00' or max(v)[-8:] < '17:30:00' and today != k]
+    if len(exception_data) > 0:
         print(f'异常打卡：')
         for ed in exception_data:
             print(ed)
-    print('*' * 60)
+
+    print(f'每天工时：')
+    for k, v in data.items():
+        print(k, v, daily_work_times.get(k, '---'))
+
+    first_day = datetime.date(int(cur_month[:4]), int(cur_month[-2:]), 1)
+    all_workdays = {str(d) for d in (first_day + datetime.timedelta(days=i) for i in range(31)) if is_workday(str(d)) and d.month == int(cur_month[-2:])}
+    all_workdays_count = len(all_workdays)
+    if today in all_workdays and today not in daily_work_times:
+        daily_work_times[today] = work_time(min(data.get(today, [today + ' 08:30:00'])), today + ' 17:30:00')
+
+    plan_work_times = {k: v for k, v in daily_work_times.items()}
+    for d in all_workdays:
+        if d not in plan_work_times:
+            plan_work_times[d] = 9
+    print(f'如果以后工作9小时，平均工时为：{sum(plan_work_times.values()) / len(plan_work_times)}')
+
+    plan_work_times = {k: v for k, v in daily_work_times.items()}
+    for d in all_workdays:
+        if d not in plan_work_times:
+            plan_work_times[d] = 9.5
+    print(f'如果以后工作9.5小时，平均工时为：{sum(plan_work_times.values()) / len(plan_work_times)}')
+
+    plan_work_times = {k: v for k, v in daily_work_times.items()}
+    for d in all_workdays:
+        if d not in plan_work_times:
+            plan_work_times[d] = 10
+    print(f'如果以后工作10小时，平均工时为：{sum(plan_work_times.values()) / len(plan_work_times)}')
+
+    print('*' * 80)
+
+
+def format_month(m, regexes):
+    for reg, func in regexes.items():
+        if re.search(reg, m):
+            return func(m)
+
+
+def save_info(id_or_pwd, val):
+    fp = os.path.abspath(__file__)
+    regex = rf'^\s*{id_or_pwd}\s*=\s*\'[^\']*\'\s*$'
+
+    with open(fp, 'r', encoding='utf8') as f:
+        lines = f.readlines()
+
+    for i in range(len(lines)):
+        if re.search(regex, lines[i]):
+            lines[i] = re.search(r'^\s*', lines[i]).group(0) + f'{id_or_pwd} = \'{val}\'\n'
+
+    with open(fp, 'w', encoding='utf8') as f:
+        f.writelines(lines)
 
 
 if __name__ == '__main__':
-    import mima
+    id = '335524'
+    pwd = 'gbbscsyrrd319!'
 
-    id = mima.id
-    pwd = mima.pwd
     if not id:
-        id = input('请输入中软工号：')
+        id = input('初次使用，请输入中软工号(脚本里会记住账号)：')
+        save_info('id', id)
     if not pwd:
-        pwd = getpass.getpass('请输入密码：')
-    month = input('请输入月份(格式YYYY-MM,不输入的话，默认当前月)：')
-    if month:
-        months = re.split(r'[,\s]+', month)
-    else:
-        today = time.localtime()
-        month = time.strftime('%Y-%m', today)
-        months = [month]
+        pwd = getpass.getpass('初次使用，请输入密码(脚本里会记住密码)：')
+        save_info('pwd', pwd)
 
-    months_records = get_work_time_details(id, pwd, months)
-    for _, records in months_records.items():
-        compute(records)
+    print(f'当前账号{id}')
+    print('账号密码已记住，如果想要删掉，请在脚本里搜索删除。')
 
-    input('按enter键结束...')
+    session, headers = get_token(id, pwd)
+
+    while True:
+        print()
+        print()
+        month = input('请输入月份(格式支持：{YYYY-MM YYYY-M YY-MM YY-M MM M},不输入默认当月)：')
+        if month:
+            year = datetime.datetime.now().year
+            regexes = {
+                r'^[0-9]{4}-1[0-2]$': lambda m: m,
+                r'^[0-9]{4}-0[1-9]$': lambda m: m,
+                r'^[0-9]{4}-[1-9]$': lambda m: f'{m[:4]}-0{m[-1:]}',
+
+                r'^[0-9]{2}-1[0-2]$': lambda m: f'{year // 100}{m}',
+                r'^[0-9]{2}-0[1-9]$': lambda m: f'{year // 100}{m}',
+                r'^[0-9]{2}-[1-9]$': lambda m: f'{year // 100}{m[:2]}-0{m[-1:]}',
+
+                r'^[0-9]{4}1[0-2]$': lambda m: f'{m[:4]}-{m[-2:]}',
+                r'^[0-9]{4}0[1-9]$': lambda m: f'{m[:4]}-{m[-2:]}',
+
+                r'^1[0-2]$': lambda m: f'{year}-{m}',
+                r'^0[1-9]$': lambda m: f'{year}-{m}',
+                r'^[1-9]$': lambda m: f'{year}-0{m}',
+            }
+            months = re.split(r'[^0-9\-]+', month)
+            months = {x for x in (format_month(m, regexes) for m in months) if x}
+            if not months:
+                print(f'输入的月份不对！')
+        else:
+            today = time.localtime()
+            month = time.strftime('%Y-%m', today)
+            months = {month}
+
+        try:
+            months_records = get_work_time_details(session, headers, months)
+        except Exception as e:
+            session, headers = get_token(id, pwd)
+            print(f'上次登录已过时，已重新登录。')
+            months_records = get_work_time_details(session, headers, months)
+
+        for _, records in months_records.items():
+            compute(records)
+
+    # input('按enter键结束...')
