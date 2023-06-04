@@ -16,14 +16,14 @@ class UniformDistribution:
         return self.cp(hi) - self.cp(lo)
 
     def miu(self):
-        return (self._alpha+self._beta)/2
+        return (self._alpha + self._beta) / 2
 
     def sigma(self):
-        res=(self._beta-self._alpha)**2/12
-        return res**0.5
+        res = (self._beta - self._alpha) ** 2 / 12
+        return res ** 0.5
 
 
 if __name__ == '__main__':
     pd = UniformDistribution(0, 30)
     print(pd.cp(5))
-    print(1-pd.cp(10))
+    print(1 - pd.cp(10))

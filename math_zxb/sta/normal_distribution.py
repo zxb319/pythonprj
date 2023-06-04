@@ -29,10 +29,10 @@ class NormalDistribution(Dist):
     def pbetween(self, lo: float, hi: float):
         return integral(self._df, lo, hi)
 
-    def x_of(self,p:float):
-        assert 0<p<1
+    def x_of(self, p: float):
+        assert 0 < p < 1
 
-        return math_zxb.root_binarily(lambda x:self.cp(x)-p,self._miu-100*self._sigma,self._miu+100*self._sigma)
+        return math_zxb.root_binarily(lambda x: self.cp(x) - p, self._miu - 100 * self._sigma, self._miu + 100 * self._sigma)
 
     def range_of(self, p: float = 0.95):
         assert 0 < p < 1
@@ -49,6 +49,7 @@ class NormalDistribution(Dist):
     def sigma(self):
         return self._sigma
 
+
 if __name__ == '__main__':
     pd = NormalDistribution(0, 1)
-    print(pd.range_of(0.95))
+    print(pd.x_of(0.95))

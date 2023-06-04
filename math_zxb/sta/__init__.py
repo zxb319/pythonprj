@@ -7,12 +7,14 @@ from dsa.fraction import Fraction
 
 
 def mode(elems: Iterable[float]):
+    """众数"""
     counter = Counter(elems)
     max_count = max(c for x, c in counter.items())
     return list((x, c) for x, c in counter.items() if c == max_count)
 
 
 def median(elems: Iterable[float]):
+    """中位数"""
     sorted_list = sorted(elems)
     if len(sorted_list) % 2 == 1:
         return sorted_list[len(sorted_list) // 2]
@@ -35,7 +37,6 @@ def std(elems: List[float]):
 
 
 def sample_range(elems: Iterable[float]):
-    l = list(elems)
     return max(elems) - min(elems)
 
 
@@ -74,9 +75,9 @@ def C(n: int, m: int):
 
 
 if __name__ == '__main__':
-    a=3**12*A(3,3)
-    b=3**15
+    a = 3 ** 12 * A(3, 3)
+    b = 3 ** 15
 
-    f=Fraction(a,b)
+    f = Fraction(a, b)
 
     print(f)

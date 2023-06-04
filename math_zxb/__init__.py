@@ -13,11 +13,11 @@ def differential(f: Callable[[float], float], x: float):
 
 
 def integral(func: Callable[[float], float], lo: float, hi: float):
-    n = 100_0000
+    n = 1_0000
     delta = (hi - lo) / n
     res = 0
     for i in range(n):
-        res += (func(lo + delta * (i)) + func(lo + delta * (i + 1)) + 4 * func(lo + delta * (i + 0.5))) / 6 * delta
+        res += (func(lo + delta * i) + func(lo + delta * (i + 1)) + 4 * func(lo + delta * (i + 0.5))) / 6 * delta
 
     return res
 

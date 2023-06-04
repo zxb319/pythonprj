@@ -8,17 +8,22 @@ import time
 import requests
 
 except_holidays = {
-    '2022-09-12',
-    '2022-10-03',
-    '2022-10-04',
-    '2022-10-05',
-    '2022-10-06',
-    '2022-10-07',
+    '2022-09-12', '2022-10-03', '2022-10-04', '2022-10-05', '2022-10-06', '2022-10-07',
+    '2023-01-02', '2023-01-23', '2023-01-24', '2023-01-25', '2023-01-26', '2023-01-27',
+    '2023-04-05',
+    '2023-05-01', '2023-05-02', '2023-05-03',
+    '2023-06-22', '2023-06-23',
+    '2023-09-29',
+    '2023-10-02', '2023-10-03', '2023-10-04', '2023-10-05', '2023-10-06',
 }
 
 except_workdays = {
-    '2022-10-08',
-    '2022-10-09',
+    '2022-10-08', '2022-10-09',
+    '2023-01-28', '2023-01-29',
+    '2023-04-23',
+    '2023-05-06',
+    '2023-06-25',
+    '2023-10-07', '2023-10-08',
 }
 
 date_format_str = '%Y-%m-%d'
@@ -137,74 +142,86 @@ def work_time(from_time: str, to_time: str):
     return (to_time - from_time) / 3600 - rest_hour
 
 
+def round_(num: float):
+    if num is None:
+        return None
+    return round(num, 4)
+
+
+def compute_plan_work_times(plan_work_time: float, daily_work_times: dict, today, all_workdays):
+    plan_work_times = {k: v for k, v in daily_work_times.items()}
+    for d in all_workdays:
+        if d not in plan_work_times and d > today:
+            plan_work_times[d] = plan_work_time
+    print(f'如果以后工作{"%4.1f" % plan_work_time}小时，平均工时为：{round_(sum(plan_work_times.values()) / len(plan_work_times))}')
+
+
 def compute(records):
+    if len(records) == 0:
+        print('没有数据')
+        return
     data = {}
     today = time.strftime('%Y-%m-%d', time.localtime())
+    now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
     for r in records:
         if r['dt'] not in data:
             data[r['dt']] = []
         data[r['dt']].append(r['checktime'])
-    daily_work_times = {k: work_time(min(v), max(v)) for k, v in data.items() if not (k == today and len(v) == 1)}
+    daily_work_times = {k: work_time(min(v), max(v)) for k, v in data.items()}
+    daily_work_times = {k: v for k, v in daily_work_times.items() if v >= 7 and is_workday(k)}
     total_work_time = sum(v for k, v in daily_work_times.items())
     days_count = len(daily_work_times)
-    if days_count == 0:
-        print('没有数据！')
-        return
-    average_work_time = total_work_time / days_count
+    average_work_time = (total_work_time / days_count) if days_count else None
     lack_time = days_count * 8 - total_work_time
 
-    print('*' * 80)
+    print('*' * 35)
     cur_month = records[0]["dt"][:7]
     print(f'{cur_month}的数据：')
     print(f'出勤天数：{days_count}')
-    print('总工时: ', total_work_time)
-    print('平均工时: ', average_work_time)
+    print('总工时: ', round_(total_work_time), '小时')
+    print('平均工时: ', round_(average_work_time), '小时')
     if lack_time < 0:
-        print(f'超出标准工时: {-lack_time} 小时,即 {-lack_time * 60} 分')
+        print(f'超出标准工时: {round_(-lack_time)} 小时,即 {round_(-lack_time * 60)} 分')
     else:
-        print(f'缺工时: {lack_time} 小时,即 {lack_time * 60} 分')
+        print(f'缺工时: {round_(lack_time)} 小时,即 {round_(lack_time * 60)} 分')
 
     lack_time += days_count * 0.5
     if lack_time > 0:
-        print(f'平均工时要达到8.5，缺工时: {lack_time} 小时,即 {lack_time * 60} 分')
+        print(f'平均工时要达到8.5，缺工时: {round_(lack_time)} 小时,即 {round_(lack_time * 60)} 分')
     else:
-        print(f'已满足8.5，且超过: {-lack_time} 小时,即 {-lack_time * 60} 分')
-
-    exception_data = [(k, v) for k, v in data.items() if min(v)[-8:] > '09:00:00' or max(v)[-8:] < '17:30:00' and today != k]
-    if len(exception_data) > 0:
-        print(f'异常打卡：')
-        for ed in exception_data:
-            print(ed)
-
-    print(f'每天工时：')
-    for k, v in data.items():
-        print(k, v, daily_work_times.get(k, '---'))
+        print(f'已满足8.5，且超过: {round_(-lack_time)} 小时,即 {round_(-lack_time * 60)} 分')
 
     first_day = datetime.date(int(cur_month[:4]), int(cur_month[-2:]), 1)
     all_workdays = {str(d) for d in (first_day + datetime.timedelta(days=i) for i in range(31)) if is_workday(str(d)) and d.month == int(cur_month[-2:])}
-    all_workdays_count = len(all_workdays)
+    exception_data = [(k, v) for k, v in data.items() if min(v)[-8:] > '09:00:00' or max(v)[-8:] < '17:30:00' and today != k]
+    exception_data += [(d, []) for d in all_workdays if d <= today and d not in data]
+    if len(exception_data) > 0:
+        print(f'异常打卡：')
+        for ed in sorted(exception_data):
+            print(ed[0], [x[-8:] for x in ed[1]])
+
+    print(f'当天打卡：')
+    for k, v in data.items():
+        if k != today:
+            continue
+        print(k, '\t'.join([x[-8:] for x in v]), round_(daily_work_times.get(k)), sep='\t')
+
     if today in all_workdays and today not in daily_work_times:
-        daily_work_times[today] = work_time(min(data.get(today, [today + ' 08:30:00'])), today + ' 17:30:00')
+        from_time = min(data.get(today, [today + ' 08:30:00']))
+        to_time = today + ' 17:30:00'
+        if to_time < now:
+            to_time = now
+        daily_work_times[today] = work_time(from_time, to_time)
+        print(f'\n如果{to_time}下班，平均工时：{sum(v for v in daily_work_times.values()) / len(daily_work_times)}')
+    print()
+    compute_plan_work_times(7.5, daily_work_times, today, all_workdays)
+    compute_plan_work_times(8, daily_work_times, today, all_workdays)
+    compute_plan_work_times(8.5, daily_work_times, today, all_workdays)
+    compute_plan_work_times(9, daily_work_times, today, all_workdays)
+    compute_plan_work_times(9.5, daily_work_times, today, all_workdays)
+    compute_plan_work_times(10, daily_work_times, today, all_workdays)
 
-    plan_work_times = {k: v for k, v in daily_work_times.items()}
-    for d in all_workdays:
-        if d not in plan_work_times:
-            plan_work_times[d] = 9
-    print(f'如果以后工作9小时，平均工时为：{sum(plan_work_times.values()) / len(plan_work_times)}')
-
-    plan_work_times = {k: v for k, v in daily_work_times.items()}
-    for d in all_workdays:
-        if d not in plan_work_times:
-            plan_work_times[d] = 9.5
-    print(f'如果以后工作9.5小时，平均工时为：{sum(plan_work_times.values()) / len(plan_work_times)}')
-
-    plan_work_times = {k: v for k, v in daily_work_times.items()}
-    for d in all_workdays:
-        if d not in plan_work_times:
-            plan_work_times[d] = 10
-    print(f'如果以后工作10小时，平均工时为：{sum(plan_work_times.values()) / len(plan_work_times)}')
-
-    print('*' * 80)
+    print('*' * 35)
 
 
 def format_month(m, regexes):
@@ -240,13 +257,10 @@ if __name__ == '__main__':
         save_info('pwd', pwd)
 
     print(f'当前账号{id}')
-    print('账号密码已记住，如果想要删掉，请在脚本里搜索删除。')
 
     session, headers = get_token(id, pwd)
 
     while True:
-        print()
-        print()
         month = input('请输入月份(格式支持：{YYYY-MM YYYY-M YY-MM YY-M MM M},不输入默认当月)：')
         if month:
             year = datetime.datetime.now().year
@@ -284,5 +298,7 @@ if __name__ == '__main__':
 
         for _, records in months_records.items():
             compute(records)
+
+        break
 
     # input('按enter键结束...')

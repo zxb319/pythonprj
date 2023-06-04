@@ -2,8 +2,6 @@ from typing import Any
 
 
 class _Node:
-    __slots__ = {"val", "next", "pre"}
-
     def __init__(self, val: Any, next=None, pre=None):
         self.val = val
         self.next: _Node = next

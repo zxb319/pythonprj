@@ -20,8 +20,9 @@ class PoissonDistribution:
 
     @property
     def sigma(self):
-        return self._lambda**0.5
+        return self._lambda ** 0.5
+
 
 if __name__ == '__main__':
-    pd = PoissonDistribution(0.05*20)
+    pd = PoissonDistribution(0.05 * 20)
     print(pd.p(2))

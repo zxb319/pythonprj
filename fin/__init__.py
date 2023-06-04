@@ -5,15 +5,10 @@ from typing import List
 from math_zxb import root_binarily
 
 
-def ear(rs: float, m: float):
-    """
-    :param rs: stated annual interest rate
-    :param m: compounded count per year
-    :return: effective annual interest rate
-    """
-    if m is math.inf:
-        return math.e ** rs - 1
-    return (1 + rs / m) ** m - 1
+def effective_annual_interest_rate(stated_annual_interest_rate: float, pay_times_per_year: int):
+    if pay_times_per_year is math.inf:
+        return math.e ** stated_annual_interest_rate - 1
+    return (1 + stated_annual_interest_rate / pay_times_per_year) ** pay_times_per_year - 1
 
 
 def time_value(cash_flow: List[float], r: float, time_point: int):
@@ -36,7 +31,7 @@ def annuity(present_value: float, r: float, n: int):
 
 
 def period_count(present_value: float, r: float, annuity: float):
-    return -math.log(1 - r * present_value / annuity)/math.log(1 + r)
+    return -math.log(1 - r * present_value / annuity) / math.log(1 + r)
 
 
 def twr(hprs: List[float]):
@@ -81,9 +76,15 @@ def debj(present_value: float, r: float, n: int):
 
 
 if __name__ == '__main__':
-    a=1505
-    p=30_0000
-    r=0.06/12
-    print(p*r)
-    n=period_count(p,r,a)
-    print(n/12)
+    # a=100_0000
+    # m=12
+    # n=20
+    # r=0.0441
+    #
+    # res=debx(a,r/m,m*n)
+    # print(*res,sep='\n')
+    #
+    # print()
+    # print(*debj(a,r/m,m*n),sep='\n')
+
+    print((1+1/10000_0000)**1000_00000)
