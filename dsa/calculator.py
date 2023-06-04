@@ -4,7 +4,7 @@ import re
 
 def get_tokens(s: str):
     regs = [
-        r'^\d+(\.\d+)?(e[+\-]?\d+)?',
+        r'^\d+\.?(\d+)?(e[+\-]?\d+)?',
         r'^\.\d+(e[+\-]?\d+)?',
         r'^\+',
         r'^\-',
@@ -33,7 +33,7 @@ def get_tokens(s: str):
 
 def is_number_token(t):
     regs = [
-        r'^\d+(\.\d+)?(e[+\-]?\d+)?$',
+        r'^\d+\.?(\d+)?(e[+\-]?\d+)?$',
         r'^\.\d+(e[+\-]?\d+)?$',
     ]
     for r in regs:
@@ -66,6 +66,11 @@ class Neg:
 class Pos:
     def __init__(self, v):
         self.value = v.value
+
+
+class Pol:
+    def __init__(self, left, right):
+        self.value = left.value ** right.value
 
 
 class Mul:
@@ -114,13 +119,25 @@ def is_expr_factor(tks):
 
 
 @cache
-def is_neg_factor(tks):
-    return len(tks) >= 2 and tks[0] in '+-' and is_factor(tks[1:])
+def is_pol_factor(tks):
+    locs = list(find_loc(tks, ['**']))
+    for pl in locs:
+        a = is_factor(tks[pl + 1:])
+        b = is_factor(tks[:pl])
+        if a and b:
+            return True
+
+    return False
 
 
 @cache
 def is_factor(tks):
-    return is_num_factor(tks) or is_expr_factor(tks) or is_neg_factor(tks)
+    return is_num_factor(tks) or is_expr_factor(tks) or is_pol_factor(tks)
+
+
+@cache
+def is_neg_term(tks):
+    return len(tks) >= 2 and tks[0] in '+-' and is_term(tks[1:])
 
 
 @cache
@@ -137,7 +154,7 @@ def is_mul_term(tks):
 
 @cache
 def is_term(tks):
-    return is_factor(tks) or is_mul_term(tks)
+    return is_factor(tks) or is_neg_term(tks) or is_mul_term(tks)
 
 
 @cache
@@ -162,17 +179,28 @@ def get_factor(tks):
         return Value(tks[0])
     if is_expr_factor(tks):
         return get_expr(tks[1:-1])
-    if is_neg_factor(tks):
-        if tks[0] == '+':
-            return get_factor(tks[1:])
-        else:
-            return Neg(get_factor(tks[1:]))
+    if is_pol_factor(tks):
+        locs = list(find_loc(tks, ['**']))
+        for pl in locs:
+            a = is_factor(tks[pl + 1:])
+            b = is_factor(tks[:pl])
+            if a and b:
+                left = get_factor(tks[:pl])
+                right = get_factor(tks[pl + 1:])
+                return Pol(left, right)
+
     raise Exception('语法错误')
 
 
 def get_term(tks):
     if is_factor(tks):
         return get_factor(tks)
+
+    if is_neg_term(tks):
+        if tks[0] == '+':
+            return get_term(tks[1:])
+        else:
+            return Neg(get_term(tks[1:]))
 
     locs = list(reversed(find_loc(tks, '*/')))
     for pl in locs:
@@ -204,11 +232,12 @@ def get_expr(tks):
             else:
                 return Sub(left, right)
 
-    raise Exception('语法错了！')
+    raise Exception(rf'语法错了！{tks}')
 
 
 if __name__ == '__main__':
-    tokens = list(get_tokens(''))
+    tokens = list(get_tokens('2--2--2--2--2'))
+    print(is_term(tokens))
     # print(tokens)
     # print(*globals().items(),sep='\n')
     a = get_expr(tks=tokens)
