@@ -76,6 +76,49 @@ def isPrime(num: int) -> bool:
     return True
 
 
+import functools
+
+
+class Loop:
+
+    def __init__(self, times):
+        self.times = times
+        self.funcs = []
+        self.args = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for i in range(self.times):
+            print(rf'第{i + 1}次执行：')
+            for f, a in zip(self.funcs, self.args):
+                a_str = ','.join(str(x) for x in a['args']) + ',' + ','.join(rf"{k}={v}" for k, v in a['kwargs'])
+                r = f(*a['args'], **a['kwargs'])
+                print(rf"执行了{f.__name__}({a_str}):结果为:{r}")
+        pass
+
+    def __getattr__(self, item):
+        def dec_func(func):
+            @functools.wraps(func)
+            def inner(*args, **kwargs):
+                self.args.append({
+                    'args': args,
+                    'kwargs': kwargs,
+                })
+
+            return inner
+
+        f = globals().get(item)
+        print(*globals().items(),sep='\n')
+        self.funcs.append(f)
+
+        return dec_func(f)
+
+
 if __name__ == "__main__":
-    a = lcm(3, 12)
-    print(a)
+    with Loop(times=3) as a:
+        a.isPrime(2)
+        a.gcd(8, 12)
+    #
+    # print(*globals().items(),sep='\n')

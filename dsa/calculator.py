@@ -1,4 +1,5 @@
 import functools
+import math
 import re
 
 
@@ -8,12 +9,14 @@ def get_tokens(s: str):
         r'^\.\d+(e[+\-]?\d+)?',
         r'^\+',
         r'^\-',
-        r'^\*\*',
+        r'^\^\^',
         r'^\*',
         r'^/',
         r'^\(',
         r'^\)',
         r'^\s+',
+        r'^[_a-z]+[_a-z0-9]*',
+        r'^,',
     ]
 
     while s:
@@ -44,6 +47,11 @@ def is_number_token(t):
     return False
 
 
+def is_func_name(t):
+    reg = re.search(r'^[_a-z]+[_a-z0-9]*$', t, re.IGNORECASE)
+    return reg is not None
+
+
 def find_loc(tks, ts):
     ret = []
     for i, tt in enumerate(tks):
@@ -66,6 +74,32 @@ class Neg:
 class Pos:
     def __init__(self, v):
         self.value = v.value
+
+
+_funcs = {
+    'log': lambda a, b: math.log(b, a),
+    'sin': lambda x: math.sin(x),
+    'cos': lambda x: math.cos(x),
+    'tan': lambda x: math.tan(x),
+    'cot': lambda x: 1 / math.tan(x),
+    'pi': lambda: math.pi,
+    'e': lambda: math.e
+}
+
+
+class FuncCall:
+    def __init__(self, func_name, *args):
+        f = _funcs.get(func_name)
+        if not f:
+            raise ArithmeticError(rf'不支持：{func_name}！')
+
+        args=[a.value for a in args]
+        try:
+            r=f(*args)
+        except Exception as e:
+            raise ArithmeticError(rf'报错：{func_name}({",".join(str(ar) for ar in args)}) : {e}')
+
+        self.value = r
 
 
 class Pol:
@@ -120,7 +154,7 @@ def is_expr_factor(tks):
 
 @cache
 def is_pol_factor(tks):
-    locs = list(find_loc(tks, ['**']))
+    locs = list(find_loc(tks, ['^^']))
     for pl in locs:
         a = is_factor(tks[pl + 1:])
         b = is_factor(tks[:pl])
@@ -131,8 +165,44 @@ def is_pol_factor(tks):
 
 
 @cache
+def is_paras(tks):
+    if not tks:
+        return True
+    comma_loc = find_loc(tks, ',')
+
+    a = is_expr(tks)
+    if a:
+        return True
+
+    for cl in comma_loc:
+        a = is_expr(tks[:cl])
+        b = is_paras(tks[cl + 1:])
+        if a and b:
+            return True
+
+    return False
+
+
+@cache
+def is_func_factor(tks):
+    if len(tks) < 3:
+        return False
+
+    if not is_func_name(tks[0]):
+        return False
+
+    if tks[1] != '(':
+        return False
+
+    if tks[-1] != ')':
+        return False
+
+    return is_paras(tks[2:-1])
+
+
+@cache
 def is_factor(tks):
-    return is_num_factor(tks) or is_expr_factor(tks) or is_pol_factor(tks)
+    return is_num_factor(tks) or is_expr_factor(tks) or is_pol_factor(tks) or is_func_factor(tks)
 
 
 @cache
@@ -180,7 +250,7 @@ def get_factor(tks):
     if is_expr_factor(tks):
         return get_expr(tks[1:-1])
     if is_pol_factor(tks):
-        locs = list(find_loc(tks, ['**']))
+        locs = list(find_loc(tks, ['^^']))
         for pl in locs:
             a = is_factor(tks[pl + 1:])
             b = is_factor(tks[:pl])
@@ -189,7 +259,28 @@ def get_factor(tks):
                 right = get_factor(tks[pl + 1:])
                 return Pol(left, right)
 
-    raise Exception('语法错误')
+    if is_func_factor(tks):
+        def get_paras(ttkkss):
+            if not ttkkss:
+                return []
+
+            comma_loc = find_loc(ttkkss, ',')
+            a = is_expr(ttkkss)
+            if a:
+                return [get_expr(ttkkss)]
+
+            for cl in comma_loc:
+                a = is_expr(ttkkss[:cl])
+                b = is_paras(ttkkss[cl + 1:])
+                if a and b:
+                    return [get_expr(ttkkss[:cl])] + get_paras(ttkkss[cl + 1:])
+
+            raise Exception(rf'语法错误:{ttkkss}')
+
+        paras = get_paras(tks[2:-1])
+        return FuncCall(tks[0], *paras)
+
+    raise Exception(rf'语法错误:{tks}')
 
 
 def get_term(tks):
@@ -236,9 +327,14 @@ def get_expr(tks):
 
 
 if __name__ == '__main__':
-    tokens = list(get_tokens('2--2--2--2--2'))
-    print(is_term(tokens))
+    expr_s=r'''
+        (log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()
+    '''
+    tokens = list(get_tokens(expr_s.strip()))
+    print((tokens))
     # print(tokens)
     # print(*globals().items(),sep='\n')
     a = get_expr(tks=tokens)
     print(a.value)
+    print(4 ** 1.5)
+

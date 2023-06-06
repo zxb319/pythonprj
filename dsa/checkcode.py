@@ -16,7 +16,7 @@ def checkdeImage(width: int, height: int, checkcode: str):
     img = Image.new('RGB', (width, height), randomColor())
     draw = ImageDraw.Draw(img)
 
-    for i in range(30):
+    for i in range(50):
         draw.line((randomXy(width, height), randomXy(width, height)), fill=randomColor())
 
     for i, c in enumerate(checkcode):
