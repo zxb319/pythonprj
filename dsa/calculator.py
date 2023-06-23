@@ -328,7 +328,7 @@ def get_expr(tks):
 
 if __name__ == '__main__':
     expr_s=r'''
-        (log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()+(log(e(),e()^^e())+e())/e()
+        log(2,-log(e(),e()^^(-8)))
     '''
     tokens = list(get_tokens(expr_s.strip()))
     print((tokens))
@@ -336,5 +336,4 @@ if __name__ == '__main__':
     # print(*globals().items(),sep='\n')
     a = get_expr(tks=tokens)
     print(a.value)
-    print(4 ** 1.5)
 

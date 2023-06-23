@@ -1,2 +1,5 @@
+import re
 
-2**----9
+a=re.split(r'点','ssss点')
+
+print(a)

@@ -1,14 +1,18 @@
+import base64
+import json
 import math
 import os.path
+import re
 import time
 
-from flask import Blueprint, Response, send_file
+import requests
+from flask import Blueprint, Response, send_file, redirect, url_for, make_response
 from sqlalchemy import or_
 
 from app import tools
 
 from app.model import db, Shici
-from dsa.html import *
+from dsa.html_obj import *
 
 general = Blueprint('general', url_prefix='/', import_name=__name__)
 
@@ -16,6 +20,14 @@ general = Blueprint('general', url_prefix='/', import_name=__name__)
 @general.route('/heartbeat', methods=['GET'])
 def heartbeat():
     return tools.json_response(data='server running normal!')
+
+@general.route('/tool_env', methods=['GET'])
+def tool_env():
+    ip='192.168.1.4'
+    port=22
+    user='zxb'
+    pwd='zxb319'
+    return redirect(rf'http://127.0.0.1:9999/?hostname={ip}&username={user}&password={base64.b64encode(pwd.encode()).decode()}&port={port}&title=tool_env')
 
 
 @general.route('/shicis/', methods=['GET'])
