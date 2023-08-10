@@ -72,10 +72,10 @@ from cmbird import *
 from logic import *
 
 class {self.case_id}(cmbird):
-@information(
-    case_id='{self.case_id}',
-    case_name='{self.case_name}'
-)
+    @information(
+        case_id='{self.case_id}',
+        case_name='{self.case_name}'
+    )
     def __init__(self):
         Logic_Case_Init(__file__)
         pass

@@ -16,11 +16,23 @@ def run_time(c: Callable):
     return inner
 
 
+class CostTime:
+    """用with代码块打印代码块的执行时间"""
+
+    def __enter__(self):
+        self.start_time = time.time()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print(rf'代码块的执行时间：{time.time() - self.start_time}s')
+
+
 if __name__ == '__main__':
-    @run_time
+    # @run_time
     def ttt():
         sum(1 for i in range(10 ** 8))
         return 1
 
 
-    ttt()
+    with CostTime():
+        ttt()

@@ -1,16 +1,30 @@
+import math
+from typing import List
 
-class TTT:
-    def __init__(self):
-        pass
 
-    def __enter__(self):
-        return self
+class Solution:
+    cache={}
+    def minDistance(self, word1: str, word2: str) -> int:
+        k=(word1,word2)
+        if k in Solution.cache:
+            return Solution.cache[k]
+        if not word1:
+            return len(word2)
+        if not word2:
+            return len(word1)
+        if word1[0] == word2[0]:
+            return self.minDistance(word1[1:], word2[1:])
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        print(exc_type,exc_val,exc_tb)
+        a = self.minDistance(word1, word2[1:]) + 1
+        b = self.minDistance(word1[1:], word2) + 1
+        r=min(a,b)
+        Solution.cache[k]=r
+        return r
 
 
 if __name__ == '__main__':
-    t=TTT()
-    with t:
-        print(1/0)
+    s = Solution()
+    word1 = 'leetcode'
+    word2 = 'etco'
+    a = s.minDistance(word1, word2)
+    print(a)
