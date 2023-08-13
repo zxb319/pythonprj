@@ -3,6 +3,11 @@ import re
 from typing import List
 
 
+def indent(s: str, indent_count=1):
+    ss = s.split('\n')
+    return '\n'.join(rf'{"    " * indent_count}{x}' for x in ss)
+
+
 class Token:
     def __init__(self, type_, value):
         self.type = type_
@@ -152,7 +157,6 @@ class Token:
         (Type.COMMENT, re.compile(r'\#[^\n]*', re.IGNORECASE | re.S)),
         (Type.WHITE, re.compile(r'\s+', re.IGNORECASE | re.S)),
         (Type.BACK_SLASH, re.compile(r'\\', re.IGNORECASE | re.S)),
-
     ]
 
 
@@ -439,12 +443,152 @@ class ZOr:
         return rf'{self.left} or {self.right}'
 
 
+class ZIfExpr:
+    def __init__(self, value, cond):
+        self.value = value
+        self.cond = cond
+
+    def __str__(self):
+        return rf'{self.value} if {self.cond}'
+
+
+class ZElseExpr:
+    def __init__(self, expr):
+        self.expr = expr
+
+    def __str__(self):
+        return rf'else {self.expr}'
+
+
+class ZIfElseExpr:
+    def __init__(self, if_exprs, else_expr):
+        self.if_exprs = if_exprs
+        self.else_expr = else_expr
+
+    def __str__(self):
+        return rf'{" ".join(str(x) for x in self.if_exprs)} {self.else_expr}'
+
+
+class ZLambdaExpr:
+    def __init__(self, args, expr):
+        self.args = args
+        self.expr = expr
+
+    def __str__(self):
+        return rf'lambda {", ".join(str(x) for x in self.args)}: {self.expr}'
+
+
 class ZParExpr:
     def __init__(self, a):
         self.a = a
 
     def __str__(self):
         return rf'({self.a})'
+
+
+class ZArg:
+    class Category:
+        GENERAL = 'general'
+        TUPLE = 'tuple'
+        DICT = 'dict'
+
+    def __init__(self, category, name, has_default: bool, type_=None, default_value=None):
+        self.category = category
+        self.name = name
+        self.type = type_
+        self.has_default = has_default
+        self.default_value = default_value
+
+    def __str__(self):
+        ret = []
+        if self.category == ZArg.Category.TUPLE:
+            ret.append('*')
+        elif self.category == ZArg.Category.DICT:
+            ret.append('**')
+        ret.append(self.name)
+        if self.type:
+            ret.append(':')
+            ret.append(self.type)
+        if self.has_default:
+            ret.append('=')
+            ret.append(self.default_value)
+
+        return ''.join(str(x) for x in ret)
+
+
+class ZCall:
+    def __init__(self, name, args):
+        self.name = name
+        self.args = args
+
+    def __str__(self):
+        return rf'{self.name}({", ".join(str(x) for x in self.args)})'
+
+
+class ZPointExpr:
+    def __init__(self, names):
+        self.names = names
+
+    def __str__(self):
+        return '.'.join(self.names)
+
+
+class ZReturn:
+    def __init__(self, expr):
+        self.expr = expr
+
+    def __str__(self):
+        return rf'return {self.expr}'
+
+
+class ZIfBlock:
+    def __init__(self, cond, blocks):
+        self.cond = cond
+        self.blocks = blocks
+
+    def __str__(self):
+        if self.blocks:
+            block = '\n'.join(str(x) for x in self.blocks)
+        else:
+            block = 'pass'
+
+        return rf'''
+if {self.cond}:
+{indent(block)}
+        '''.strip()
+
+
+class ZElifBlock:
+    def __init__(self, cond, blocks):
+        self.cond = cond
+        self.blocks = blocks
+
+    def __str__(self):
+        if self.blocks:
+            block = '\n'.join(str(x) for x in self.blocks)
+        else:
+            block = 'pass'
+
+        return rf'''
+elif {self.cond}:
+{indent(block)}
+        '''.strip()
+
+
+class ZElseBlock:
+    def __init__(self, blocks):
+        self.blocks = blocks
+
+    def __str__(self):
+        if self.blocks:
+            block = '\n'.join(str(x) for x in self.blocks)
+        else:
+            block = 'pass'
+
+        return rf'''
+else:
+{indent(block)}
+        '''.strip()
 
 
 class SyntaxAgent:
@@ -679,7 +823,7 @@ class SyntaxAgent:
     def get_def_arg(self):
         self.assert_not_end()
         cur_token = self.tokens[self.pos]
-        if cur_token.type in (Token.Type.MUL,Token.Type.POW):
+        if cur_token.type in (Token.Type.MUL, Token.Type.POW):
             self.pos += 1
 
         cur_token = self.tokens[self.pos]

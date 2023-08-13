@@ -436,7 +436,7 @@ if __name__ == '__main__':
     print(Calendar(today))
     print('*' * 40)
     print()
-    for i in range(1, 15):
+    for i in range(1, 32):
         dt = today + datetime.timedelta(days=i)
         c = Calendar(dt)
         if c.g_jie or c.solar_term or c.sanfu or c.jiujiu or c.l_jie:

@@ -1,5 +1,3 @@
 
-def ffff(a=1):
-    pass
+a=lambda x:1
 
-print(dir('''ddss'''))

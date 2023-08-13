@@ -1,6 +1,7 @@
 import enum
+import functools
 import re
-from typing import List, Tuple
+from typing import List
 
 
 class Token:
@@ -15,15 +16,14 @@ class Token:
         MUL = 7
         DIV = 8
         POW = 9
+        MOD = 10
 
-        EQ = 10
-        NE = 11
-        LT = 12
-        LE = 13
-        GT = 14
-        GE = 15
-        IN = 16
-        BETWEEN = 17
+        EQ = 11
+        NE = 12
+        LT = 13
+        LE = 14
+        GT = 15
+        GE = 16
 
         NOT = 18
         AND = 19
@@ -39,45 +39,57 @@ class Token:
         WHITE = 27
 
         COMMA = 28
+        COMMENT = 29
+
+        ASSIGN = 34
+        IF = 30
+        ELIF = 31
+        ELSE = 32
+        WHILE = 33
 
     TOKEN_TYPE_REGS = [
-        (Type.IN, r'\bin\b'),
-        (Type.BETWEEN, r'\bbetween\b'),
+        (Type.IDN, re.compile(r'[a-z_][a-z\d_]*', re.IGNORECASE | re.S)),
+        (Type.INT, re.compile(r'\d+', re.IGNORECASE | re.S)),
+        (Type.FLOAT, re.compile(r'(\d+\.\d*|\.\d+)(e[\+\-]?\d+)?', re.IGNORECASE | re.S)),
+        (Type.STR, re.compile(r'''\"(\\\"|[^\"])*\"''', re.IGNORECASE | re.S)),
 
-        (Type.NOT, r'\bnot\b'),
-        (Type.AND, r'\band\b'),
-        (Type.OR, r'\bor\b'),
+        (Type.ADD, re.compile(r'\+', re.IGNORECASE | re.S)),
+        (Type.SUB, re.compile(r'\-', re.IGNORECASE | re.S)),
+        (Type.POW, re.compile(r'\*\*', re.IGNORECASE | re.S)),
+        (Type.MUL, re.compile(r'\*', re.IGNORECASE | re.S)),
+        (Type.DIV, re.compile(r'/', re.IGNORECASE | re.S)),
+        (Type.MOD, re.compile(r'%', re.IGNORECASE | re.S)),
 
-        (Type.IDN, r'[a-z_][a-z\d_]*'),
-        (Type.INT, r'[\+\-]?\d+'),
-        (Type.FLOAT, r'[\+\-]?(\d+\.\d*|\.\d+)(e[\+\-]?\d+)?'),
-        (Type.STR, r'''(\"(\\\"|[^\"])*\"|\'(\\\'|[^\'])*\')'''),
+        (Type.EQ, re.compile(r'==', re.IGNORECASE | re.S)),
+        (Type.ASSIGN, re.compile(r'=', re.IGNORECASE | re.S)),
+        (Type.NE, re.compile(r'!=', re.IGNORECASE | re.S)),
+        (Type.LE, re.compile(r'<=', re.IGNORECASE | re.S)),
+        (Type.LT, re.compile(r'<', re.IGNORECASE | re.S)),
+        (Type.GE, re.compile(r'>=', re.IGNORECASE | re.S)),
+        (Type.GT, re.compile(r'>', re.IGNORECASE | re.S)),
 
-        (Type.ADD, r'\+'),
-        (Type.SUB, r'\-'),
-        (Type.POW, r'\*\*'),
-        (Type.MUL, r'\*'),
-        (Type.DIV, r'/'),
+        (Type.LP, re.compile(r'\(', re.IGNORECASE | re.S)),
+        (Type.RP, re.compile(r'\)', re.IGNORECASE | re.S)),
+        (Type.LZ, re.compile(r'\[', re.IGNORECASE | re.S)),
+        (Type.RZ, re.compile(r'\]', re.IGNORECASE | re.S)),
+        (Type.LD, re.compile(r'\{', re.IGNORECASE | re.S)),
+        (Type.RD, re.compile(r'\}', re.IGNORECASE | re.S)),
+        (Type.COMMA, re.compile(r',', re.IGNORECASE | re.S)),
 
-        (Type.EQ, r'=='),
-        (Type.NE, r'<>'),
-        (Type.LE, r'<='),
-        (Type.LT, r'<'),
-        (Type.GE, r'>='),
-        (Type.GT, r'>'),
+        (Type.WHITE, re.compile(r'\s+', re.IGNORECASE | re.S)),
+        (Type.COMMENT, re.compile(r'#[^\n]+', re.IGNORECASE | re.S)),
 
-        (Type.LP, r'\('),
-        (Type.RP, r'\)'),
-        (Type.LZ, r'\['),
-        (Type.RZ, r'\]'),
-        (Type.LD, r'\{'),
-        (Type.RD, r'\}'),
-        (Type.COMMA, r','),
-
-        (Type.WHITE, r'\s+'),
     ]
 
-    TOKEN_TYPE_REGS: List[Tuple[Type, re.Pattern]] = [(t, re.compile(r, re.IGNORECASE)) for t, r in TOKEN_TYPE_REGS]
+    KEYs = {
+        'not': Type.NOT,
+        'and': Type.AND,
+        'or': Type.OR,
+        'if': Type.IF,
+        'elif': Type.ELIF,
+        'else': Type.ELSE,
+        'while': Type.WHILE,
+    }
 
     def __init__(self, type_, value):
         self.type = type_
@@ -96,8 +108,12 @@ def get_tokens(s: str):
             match = r.match(s, cp)
             if match:
                 found = True
-                if t != Token.Type.WHITE:
-                    ret.append(Token(t, match.group(0)))
+                val = match.group(0)
+                if t not in (Token.Type.WHITE, Token.Type.COMMENT):
+                    if val in Token.KEYs:
+                        ret.append(Token(Token.KEYs[val], val))
+                    else:
+                        ret.append(Token(t, val))
                 cp += len(match.group(0))
 
         if not found:
@@ -118,48 +134,7 @@ class Float:
 
 class String:
     def __init__(self, value):
-        self.value = value
-
-
-class Array:
-    def __init__(self, exprs: List):
-        self.exprs = exprs
-
-    @property
-    def value(self):
-        return [x.value for x in self.exprs]
-
-
-class Set:
-    def __init__(self, exprs: List):
-        self.exprs = exprs
-
-    @property
-    def value(self):
-        return {x.value for x in self.exprs}
-
-
-class Dictionary:
-    def __init__(self, exprs: List):
-        self.exprs = exprs
-
-    @property
-    def value(self):
-        return {x.value: y.value for x, y in self.exprs}
-
-
-class Function:
-    def __init__(self, func_name, func_map: dict, *args, **kwargs):
-        if func_name not in func_map:
-            raise fr'function:{func_name} not defined!'
-
-        self.func = func_map[func_name]
-        self.args = args
-        self.kwargs = kwargs
-
-    @property
-    def value(self):
-        return self.func(*self.args, **self.kwargs)
+        self.value = value[1:-1]
 
 
 class BinaryOperatorExpression:
@@ -243,23 +218,6 @@ class NotEqual(BinaryOperatorExpression):
         return self.left.value != self.right.value
 
 
-class In(BinaryOperatorExpression):
-    @property
-    def value(self):
-        return self.left.value in self.right.value
-
-
-class Between:
-    def __init__(self, left, middle, right):
-        self.left = left
-        self.middle = middle
-        self.right = right
-
-    @property
-    def value(self):
-        return self.middle.value <= self.left.value <= self.right.value
-
-
 class Not:
     def __init__(self, expr):
         self.expr = expr
@@ -281,146 +239,424 @@ class Or(BinaryOperatorExpression):
         return self.left.value or self.right.value
 
 
+class FuncCall:
+    def __init__(self, context, func_name, args):
+        self.context = context
+        self.func_name = func_name
+        self.args = args
+
+    @property
+    def value(self):
+        if self.func_name not in self.context:
+            raise Exception(rf'{self.func_name} undefined!')
+        return self.context[self.func_name](*(x.value for x in self.args))
+
+
+class Variable:
+    def __init__(self, context, name):
+        self.context = context
+        self.name = name
+
+    @property
+    def value(self):
+        if self.name not in self.context:
+            raise Exception(rf'{self.name} undefined!')
+        return self.context[self.name]
+
+
+class AssignStmt:
+    def __init__(self, context, lhs, rhs):
+        self.context = context
+        self.lhs = lhs
+        self.rhs = rhs
+
+    @property
+    def value(self):
+        self.context[self.lhs] = self.rhs.value
+        return self.context[self.lhs]
+
+
+class IfBody:
+    def __init__(self, cond, stmts):
+        self.cond = cond
+        self.stmts = stmts
+
+    @property
+    def value(self):
+        r = False
+        if self.cond.value:
+            r = True
+            for stmt in self.stmts:
+                a = stmt.value
+        return r
+
+
+class ElseBody:
+    def __init__(self, stmts):
+        self.stmts = stmts
+
+    @property
+    def value(self):
+        for stmt in self.stmts:
+            a = stmt.value
+
+        return True
+
+
+class IfElseBody:
+    def __init__(self, if_bodies, else_body=None):
+        self.if_bodies = if_bodies
+        self.else_body = else_body
+
+    @property
+    def value(self):
+        for if_body in self.if_bodies:
+            if if_body.value:
+                return
+
+        if not self.else_body:
+            return
+        a = self.else_body.value
+        return
+
+
+class WhileBody:
+    def __init__(self, cond, stmts):
+        self.cond = cond
+        self.stmts = stmts
+
+    @property
+    def value(self):
+        while self.cond.value:
+            for stmt in self.stmts:
+                a = stmt.value
+
+        return
+
+
 class Agent:
-    def __init__(self, tokens: List[Token]):
+    def __init__(self, tokens: List[Token], context):
         self.tokens = tokens
         self.cp = 0
+        self.context = context if context else {}
 
-    def syntax_error(self):
-        return Exception(rf'syntax error near: {self.cp} !')
+    def syntax_error(self, msg):
+        return Exception(rf'{msg} syntax error near: {self.cp}!')
 
-    def get_integer(self):
-        ret = Integer(self.tokens[self.cp].value)
+    def assert_not_end(self):
+        if self.cp >= len(self.tokens):
+            raise Exception(rf'tokens end!')
+
+    def has_next_token(self):
+        return self.cp < len(self.tokens)
+
+    def peek_next_token(self):
+        self.assert_not_end()
+        cur_token = self.tokens[self.cp]
+        return cur_token
+
+    def get_next_token(self):
+        self.assert_not_end()
+        cur_token = self.tokens[self.cp]
         self.cp += 1
-        return ret
-
-    def get_float(self):
-        ret = Float(self.tokens[self.cp].value)
-        self.cp += 1
-        return ret
-
-    def get_string(self):
-        ret = String(self.tokens[self.cp].value)
-        self.cp += 1
-        return ret
-
-    def get_parenthesised_expr(self):
-        ret = self.get_assign_expr()
-        if self.tokens[self.cp].type == Token.Type.RP:
-            self.cp += 1
-        else:
-            raise self.syntax_error()
-        return ret
+        return cur_token
 
     def get_atomic_expr(self):
-        cur_token = self.tokens[self.cp]
+        cur_token = self.get_next_token()
         if cur_token.type == Token.Type.INT:
-            return self.get_integer()
+            return Integer(cur_token.value)
         elif cur_token.type == Token.Type.FLOAT:
-            return self.get_float()
+            return Float(cur_token.value)
         elif cur_token.type == Token.Type.STR:
-            return self.get_string()
+            return String(cur_token.value)
+        elif cur_token.type == Token.Type.IDN:
+            if not self.has_next_token():
+                return Variable(self.context, cur_token.value)
+            next_token = self.peek_next_token()
+            if next_token.type != Token.Type.LP:
+                return Variable(self.context, cur_token.value)
+            self.cp += 1
+
+            func_name = cur_token.value
+            args = []
+            cur_token = self.peek_next_token()
+            while cur_token.type != Token.Type.RP:
+                args.append(self.get_expr())
+                if not self.has_next_token():
+                    return FuncCall(self.context, func_name, args)
+                cur_token = self.peek_next_token()
+            self.cp += 1
+            return FuncCall(self.context, func_name, args)
+
         elif cur_token.type == Token.Type.LP:
-            return self.get_parenthesised_expr()
+            e = self.get_expr()
+            cur_token = self.get_next_token()
+            if cur_token.type == Token.Type.RP:
+                return e
+            else:
+                raise self.syntax_error("token(RP) expected!")
         else:
-            raise self.syntax_error()
+            raise self.syntax_error(rf"{cur_token} cannot recognized!")
 
-    def get_power_expr(self):
-        ret = []
-        while True:
-            ret.append(self.get_atomic_expr())
-            if self.cp < len(self.tokens) and self.tokens[self.cp].type == Token.Type.POW:
-                self.cp += 1
-            else:
-                break
+    def get_pow_expr(self):
+        a = self.get_atomic_expr()
+        if not self.has_next_token():
+            return a
+        cur_token = self.peek_next_token()
+        if cur_token.type != Token.Type.POW:
+            return a
+        self.cp += 1
+        b = self.get_pow_expr()
+        return Power(a, b)
 
-        if len(ret) == 1:
-            return ret[0]
-
-        expr = ret[-1]
-        for i in range(len(ret) - 2, -1, -1):
-            expr = Power(ret[i], expr)
-
-        return expr
-
-    def get_multiply_expr(self):
-        if self.tokens[self.cp].type in (Token.Type.ADD,):
+    def get_unary_expr(self):
+        cur_token = self.peek_next_token()
+        if cur_token.type == Token.Type.ADD:
             self.cp += 1
-            return self.get_power_expr()
-        elif self.tokens[self.cp].type in (Token.Type.SUB,):
+            return self.get_unary_expr()
+        elif cur_token.type == Token.Type.SUB:
             self.cp += 1
-            return Negative(self.get_power_expr())
+            return Negative(self.get_unary_expr())
+        else:
+            return self.get_pow_expr()
 
-        ret = None
-        cur_expr_type = None
-        while True:
-            if not ret:
-                ret = self.get_power_expr()
+    def get_mul_expr(self):
+        a = self.get_unary_expr()
+        if not self.has_next_token():
+            return a
+        cur_token = self.peek_next_token()
+        while cur_token.type in (Token.Type.MUL, Token.Type.DIV):
+            self.cp += 1
+            b = self.get_unary_expr()
+            if cur_token.type == Token.Type.MUL:
+                a = Multiply(a, b)
             else:
-                ret = cur_expr_type(ret, self.get_power_expr())
-            if self.cp < len(self.tokens) and self.tokens[self.cp].type == Token.Type.MUL:
-                self.cp += 1
-                cur_expr_type = Multiply
-            elif self.cp < len(self.tokens) and self.tokens[self.cp].type == Token.Type.DIV:
-                self.cp += 1
-                cur_expr_type = Divide
-            else:
-                break
-        return ret
+                a = Divide(a, b)
+            if not self.has_next_token():
+                return a
+            cur_token = self.peek_next_token()
+        return a
 
     def get_add_expr(self):
-        ret = None
-        cur_expr_type = None
-        while True:
-            if not ret:
-                ret = self.get_multiply_expr()
+        a = self.get_mul_expr()
+        if not self.has_next_token():
+            return a
+        cur_token = self.peek_next_token()
+        while cur_token.type in (Token.Type.ADD, Token.Type.SUB):
+            self.cp += 1
+            b = self.get_mul_expr()
+            if cur_token.type == Token.Type.ADD:
+                a = Add(a, b)
             else:
-                ret = cur_expr_type(ret, self.get_multiply_expr())
-            if self.cp < len(self.tokens) and self.tokens[self.cp].type == Token.Type.ADD:
-                self.cp += 1
-                cur_expr_type = Add
-            elif self.cp < len(self.tokens) and self.tokens[self.cp].type == Token.Type.SUB:
-                self.cp += 1
-                cur_expr_type = Subtract
-            else:
-                break
-        return ret
+                a = Subtract(a, b)
+            if not self.has_next_token():
+                return a
+            cur_token = self.peek_next_token()
+        return a
 
     def get_cmp_expr(self):
-        left=self.get_add_expr()
-        cur_token=self.tokens[self.cp]
-        if cur_token.type==Token.Type.EQ:
-            expr_type=Equal
-        elif cur_token.type==Token.Type.NE:
-            expr_type=NotEqual
-        elif cur_token.
+        a = self.get_add_expr()
+        if not self.has_next_token():
+            return a
+        cur_token = self.peek_next_token()
+        while cur_token.type in (Token.Type.EQ,
+                                 Token.Type.NE, Token.Type.GT, Token.Type.GE, Token.Type.LT, Token.Type.LE,):
+            self.cp += 1
+            b = self.get_add_expr()
+            if cur_token.type == Token.Type.EQ:
+                a = Equal(a, b)
+            elif cur_token.type == Token.Type.NE:
+                a = NotEqual(a, b)
+            elif cur_token.type == Token.Type.GT:
+                a = Greater(a, b)
+            elif cur_token.type == Token.Type.GE:
+                a = GreaterEqual(a, b)
+            elif cur_token.type == Token.Type.LT:
+                a = Less(a, b)
+            else:
+                a = LessEqual(a, b)
+            if not self.has_next_token():
+                return a
+            cur_token = self.peek_next_token()
+        return a
 
     def get_not_expr(self):
-        pass
+        cur_token = self.peek_next_token()
+        if cur_token.type == Token.Type.NOT:
+            self.cp += 1
+            return Not(self.get_not_expr())
+        return self.get_cmp_expr()
 
     def get_and_expr(self):
-        pass
+        a = self.get_not_expr()
+        if not self.has_next_token():
+            return a
+        cur_token = self.peek_next_token()
+        while cur_token.type in (Token.Type.AND,):
+            self.cp += 1
+            b = self.get_not_expr()
+            a = And(a, b)
+            if not self.has_next_token():
+                return a
+            cur_token = self.peek_next_token()
+        return a
 
     def get_or_expr(self):
-        pass
+        a = self.get_and_expr()
+        if not self.has_next_token():
+            return a
+        cur_token = self.peek_next_token()
+        while cur_token.type in (Token.Type.OR,):
+            self.cp += 1
+            b = self.get_and_expr()
+            a = Or(a, b)
+            if not self.has_next_token():
+                return a
+            cur_token = self.peek_next_token()
+        return a
 
-    def get_assign_expr(self):
-        pass
+    def get_expr(self):
+        return self.get_or_expr()
 
-    def get_if_expr(self):
-        pass
+    def get_assign_stmt(self):
+        cur_token = self.peek_next_token()
+        if cur_token.type != Token.Type.IDN:
+            return self.get_expr()
+        lhs = cur_token.value
+        self.cp += 1
+        if not self.has_next_token():
+            return Variable(self.context, lhs.value)
 
-    def get_while_expr(self):
-        pass
+        cur_token = self.peek_next_token()
+        if cur_token.type != Token.Type.ASSIGN:
+            self.cp -= 1
+            return self.get_expr()
 
-    def get_for_expr(self):
-        pass
+        self.cp += 1
+        rhs = self.get_expr()
+        return AssignStmt(self.context, lhs, rhs)
 
-    def get_function_define(self):
-        pass
+    def get_if_body(self):
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.IF:
+            raise self.syntax_error(rf'Token(IF) expected!')
+
+        cond = self.get_expr()
+
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.LD:
+            raise self.syntax_error(rf'Token(LD) expected!')
+
+        cur_token = self.peek_next_token()
+        sub_bodies = []
+        while cur_token.type != Token.Type.RD:
+            sub_bodies.append(self.get_body())
+            cur_token = self.peek_next_token()
+        self.cp += 1
+        return IfBody(cond, sub_bodies)
+
+    def get_elif_body(self):
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.ELIF:
+            raise self.syntax_error(rf'Token(IF) expected!')
+
+        cond = self.get_expr()
+
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.LD:
+            raise self.syntax_error(rf'Token(LD) expected!')
+
+        cur_token = self.peek_next_token()
+        sub_bodies = []
+        while cur_token.type != Token.Type.RD:
+            sub_bodies.append(self.get_body())
+            cur_token = self.peek_next_token()
+        self.cp += 1
+        return IfBody(cond, sub_bodies)
+
+    def get_else_body(self):
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.ELSE:
+            raise self.syntax_error(rf'Token(IF) expected!')
+
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.LD:
+            raise self.syntax_error(rf'Token(LD) expected!')
+
+        cur_token = self.peek_next_token()
+        sub_bodies = []
+        while cur_token.type != Token.Type.RD:
+            sub_bodies.append(self.get_body())
+            cur_token = self.peek_next_token()
+        self.cp += 1
+        return ElseBody(sub_bodies)
+
+    def get_if_else_body(self):
+        if_body = self.get_if_body()
+        if not self.has_next_token():
+            return IfElseBody([if_body])
+        if_bodies = [if_body]
+        cur_token = self.peek_next_token()
+        while cur_token.type == Token.Type.ELIF:
+            if_bodies.append(self.get_if_body())
+            if not self.has_next_token():
+                return IfElseBody(if_bodies)
+            cur_token = self.peek_next_token()
+
+        else_bocy = None
+        if cur_token.type == Token.Type.ELSE:
+            else_bocy = self.get_else_body()
+
+        return IfElseBody(if_bodies, else_bocy)
+
+    def get_while_body(self):
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.WHILE:
+            raise self.syntax_error(rf'Token(WHILE) expected!')
+        cond = self.get_expr()
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.LD:
+            raise self.syntax_error(rf'Token(LD) expected!')
+        sub_bodies = []
+        cur_token = self.peek_next_token()
+        while cur_token.type != Token.Type.RD:
+            sub_bodies.append(self.get_body())
+            if not self.has_next_token():
+                return WhileBody(cond, sub_bodies)
+            cur_token = self.peek_next_token()
+        self.cp += 1
+        return WhileBody(cond, sub_bodies)
+
+    def get_body(self):
+        cur_token = self.peek_next_token()
+        if cur_token.type == Token.Type.IF:
+            return self.get_if_else_body()
+        elif cur_token.type == Token.Type.WHILE:
+            return self.get_while_body()
+        return self.get_assign_stmt()
+
+    def run(self):
+        while self.has_next_token():
+            body = self.get_body()
+            a = body.value
 
 
 if __name__ == '__main__':
-    s = 'func   (  1   +   2,  "w w\'w")'
+    s = '''
+    n=7
+    a=0
+    b=1
+    while n>0 {
+        c=a+b
+        a=b
+        b=c
+        n=n-1
+    }
+    print(a)
+    
+    '''
     tokens = get_tokens(s)
-    print(*tokens, sep='  ')
+    agent = Agent(tokens, {
+        'print': print,
+    })
+    agent.run()

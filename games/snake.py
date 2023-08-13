@@ -4,8 +4,8 @@ from collections import deque
 
 import pygame
 
-MAP_SIZE = (40, 40)
-UNIT_SIZE = 20
+MAP_SIZE = (10, 10)
+UNIT_SIZE = 40
 
 
 class Food:
@@ -78,7 +78,7 @@ screen = pygame.display.set_mode(tuple((x + 1) * UNIT_SIZE for x in MAP_SIZE))
 pygame.display.set_caption('贪吃蛇')
 clock = pygame.time.Clock()
 
-snake = Snake(deque([(MAP_SIZE[0] // 2, MAP_SIZE[1] // 2,)]), 'Red', (255, 125, 125), (0, 1))
+snake = Snake(deque([(MAP_SIZE[0] // 2, MAP_SIZE[1] // 2,)]), 'Red', (255, 255, 125), (0, 1))
 food = Food('Green')
 food.gen_next_food_pos(snake)
 test_font = pygame.font.Font(os.path.join(rf'msyh.ttc'), 50)
