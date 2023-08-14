@@ -17,6 +17,7 @@ class Token:
         DIV = 8
         POW = 9
         MOD = 10
+        FLOOR_DIV = 'floor_div'
 
         EQ = 11
         NE = 12
@@ -57,6 +58,7 @@ class Token:
         (Type.SUB, re.compile(r'\-', re.IGNORECASE | re.S)),
         (Type.POW, re.compile(r'\*\*', re.IGNORECASE | re.S)),
         (Type.MUL, re.compile(r'\*', re.IGNORECASE | re.S)),
+        (Type.FLOOR_DIV, re.compile(r'//', re.IGNORECASE | re.S)),
         (Type.DIV, re.compile(r'/', re.IGNORECASE | re.S)),
         (Type.MOD, re.compile(r'%', re.IGNORECASE | re.S)),
 
@@ -159,6 +161,18 @@ class Divide(BinaryOperatorExpression):
     @property
     def value(self):
         return self.left.value / self.right.value
+
+
+class FloorDivide(BinaryOperatorExpression):
+    @property
+    def value(self):
+        return self.left.value // self.right.value
+
+
+class Mod(BinaryOperatorExpression):
+    @property
+    def value(self):
+        return self.left.value % self.right.value
 
 
 class Negative:
@@ -425,11 +439,15 @@ class Agent:
         if not self.has_next_token():
             return a
         cur_token = self.peek_next_token()
-        while cur_token.type in (Token.Type.MUL, Token.Type.DIV):
+        while cur_token.type in (Token.Type.MUL, Token.Type.DIV, Token.Type.FLOOR_DIV, Token.Type.MOD):
             self.cp += 1
             b = self.get_unary_expr()
             if cur_token.type == Token.Type.MUL:
                 a = Multiply(a, b)
+            elif cur_token.type == Token.Type.FLOOR_DIV:
+                a = FloorDivide(a, b)
+            elif cur_token.type == Token.Type.MOD:
+                a = Mod(a, b)
             else:
                 a = Divide(a, b)
             if not self.has_next_token():
@@ -643,16 +661,14 @@ class Agent:
 
 if __name__ == '__main__':
     s = '''
-    n=7
-    a=0
-    b=1
-    while n>0 {
-        c=a+b
-        a=b
-        b=c
-        n=n-1
+    n=6
+    cnt=1
+    sum=1
+    while cnt<=n{
+        sum=sum*cnt
+        cnt=cnt+1
     }
-    print(a)
+    print(sum)
     
     '''
     tokens = get_tokens(s)
