@@ -696,14 +696,16 @@ class Agent:
             if not self.has_next_token():
                 raise self.syntax_error(rf'Token(RP) expected!')
 
-            cur_token = self.get_next_token()
+            cur_token = self.peek_next_token()
             if cur_token.type == Token.Type.IDN:
+                self.cp += 1
                 args.append(cur_token.value)
             elif cur_token.type == Token.Type.COMMA:
-                pass
+                self.cp += 1
             elif cur_token.type != Token.Type.RP:
                 raise self.syntax_error(rf'Token(IDN) expected!')
 
+        self.cp += 1
         cur_token = self.get_next_token()
         if cur_token.type != Token.Type.LD:
             raise self.syntax_error(rf'Token(LD) expected!')
@@ -754,7 +756,22 @@ if __name__ == '__main__':
         n*n-2
     }
     
-    print(root(fff,0,10))
+    func pow(b,p){
+        if p==0{
+            ret=1
+        }elif p%2==0{
+            ret=pow(b*b,p//2)
+        }else{
+            ret=b*pow(b,p-1)
+        }
+        ret
+    }
+    
+    func sd(){
+        2**10
+    }
+    
+    print(sd())
         
     '''
 
