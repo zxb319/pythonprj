@@ -1,10 +1,10 @@
 import enum
-import functools
 import re
 from typing import List
 
 
 class Token:
+    # @enum.unique
     class Type(enum.Enum):
         IDN = 1
         INT = 2
@@ -48,10 +48,12 @@ class Token:
         ELSE = 32
         WHILE = 33
 
+        FUNC = 'func'
+
     TOKEN_TYPE_REGS = [
         (Type.IDN, re.compile(r'[a-z_][a-z\d_]*', re.IGNORECASE | re.S)),
-        (Type.INT, re.compile(r'\d+', re.IGNORECASE | re.S)),
         (Type.FLOAT, re.compile(r'(\d+\.\d*|\.\d+)(e[\+\-]?\d+)?', re.IGNORECASE | re.S)),
+        (Type.INT, re.compile(r'\d+', re.IGNORECASE | re.S)),
         (Type.STR, re.compile(r'''\"(\\\"|[^\"])*\"''', re.IGNORECASE | re.S)),
 
         (Type.ADD, re.compile(r'\+', re.IGNORECASE | re.S)),
@@ -91,6 +93,7 @@ class Token:
         'elif': Type.ELIF,
         'else': Type.ELSE,
         'while': Type.WHILE,
+        'func': Type.FUNC,
     }
 
     def __init__(self, type_, value):
@@ -254,40 +257,38 @@ class Or(BinaryOperatorExpression):
 
 
 class FuncCall:
-    def __init__(self, context, func_name, args):
-        self.context = context
+    def __init__(self, func_name, args):
         self.func_name = func_name
         self.args = args
 
     @property
     def value(self):
-        if self.func_name not in self.context:
+        # print(rf'{self.func_name}({" ".join(str(a.value) for a in self.args)})')
+        if self.func_name not in Agent.context:
             raise Exception(rf'{self.func_name} undefined!')
-        return self.context[self.func_name](*(x.value for x in self.args))
+        return Agent.context[self.func_name](*(x.value for x in self.args))
 
 
 class Variable:
-    def __init__(self, context, name):
-        self.context = context
+    def __init__(self, name):
         self.name = name
 
     @property
     def value(self):
-        if self.name not in self.context:
+        if self.name not in Agent.context:
             raise Exception(rf'{self.name} undefined!')
-        return self.context[self.name]
+        return Agent.context[self.name]
 
 
 class AssignStmt:
-    def __init__(self, context, lhs, rhs):
-        self.context = context
+    def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
 
     @property
     def value(self):
-        self.context[self.lhs] = self.rhs.value
-        return self.context[self.lhs]
+        Agent.context[self.lhs] = self.rhs.value
+        return Agent.context[self.lhs]
 
 
 class IfBody:
@@ -348,11 +349,41 @@ class WhileBody:
         return
 
 
+class FuncDef:
+    def __init__(self, func_name, arg_names, stmts):
+        self.func_name = func_name
+        self.arg_names = arg_names
+        self.stmts = stmts
+
+    @property
+    def value(self):
+        def func(*args):
+            local_context = {k: v for k, v in Agent.context.items()}
+            if len(self.arg_names) != len(args):
+                raise Exception(rf'{self.func_name} requires {len(self.arg_names)} args, but given {len(args)} args!')
+            for k, v in zip(self.arg_names, args):
+                local_context[k] = v
+
+            pre_context = Agent.context
+            Agent.context = local_context
+
+            a = None
+            for stmt in self.stmts:
+                a = stmt.value
+
+            Agent.context = pre_context
+            return a
+
+        Agent.context[self.func_name] = func
+        return
+
+
 class Agent:
-    def __init__(self, tokens: List[Token], context):
+    context = {'print': print}
+
+    def __init__(self, tokens: List[Token]):
         self.tokens = tokens
         self.cp = 0
-        self.context = context if context else {}
 
     def syntax_error(self, msg):
         return Exception(rf'{msg} syntax error near: {self.cp}!')
@@ -385,22 +416,24 @@ class Agent:
             return String(cur_token.value)
         elif cur_token.type == Token.Type.IDN:
             if not self.has_next_token():
-                return Variable(self.context, cur_token.value)
+                return Variable(cur_token.value)
             next_token = self.peek_next_token()
             if next_token.type != Token.Type.LP:
-                return Variable(self.context, cur_token.value)
+                return Variable(cur_token.value)
             self.cp += 1
 
             func_name = cur_token.value
             args = []
             cur_token = self.peek_next_token()
             while cur_token.type != Token.Type.RP:
-                args.append(self.get_expr())
                 if not self.has_next_token():
-                    return FuncCall(self.context, func_name, args)
+                    raise self.syntax_error(rf'Token(RP) expected!')
                 cur_token = self.peek_next_token()
+                if cur_token.type != Token.Type.RP:
+                    args.append(self.get_expr())
+
             self.cp += 1
-            return FuncCall(self.context, func_name, args)
+            return FuncCall(func_name, args)
 
         elif cur_token.type == Token.Type.LP:
             e = self.get_expr()
@@ -543,7 +576,7 @@ class Agent:
         lhs = cur_token.value
         self.cp += 1
         if not self.has_next_token():
-            return Variable(self.context, lhs.value)
+            return Variable(lhs.value)
 
         cur_token = self.peek_next_token()
         if cur_token.type != Token.Type.ASSIGN:
@@ -552,7 +585,7 @@ class Agent:
 
         self.cp += 1
         rhs = self.get_expr()
-        return AssignStmt(self.context, lhs, rhs)
+        return AssignStmt(lhs, rhs)
 
     def get_if_body(self):
         cur_token = self.get_next_token()
@@ -616,7 +649,7 @@ class Agent:
         if_bodies = [if_body]
         cur_token = self.peek_next_token()
         while cur_token.type == Token.Type.ELIF:
-            if_bodies.append(self.get_if_body())
+            if_bodies.append(self.get_elif_body())
             if not self.has_next_token():
                 return IfElseBody(if_bodies)
             cur_token = self.peek_next_token()
@@ -645,12 +678,51 @@ class Agent:
         self.cp += 1
         return WhileBody(cond, sub_bodies)
 
+    def get_func_body(self):
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.FUNC:
+            raise self.syntax_error(rf'Token(FUNC) expected!')
+        func_name = self.get_next_token().value
+
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.LP:
+            raise self.syntax_error(rf'Token(LP) expected!')
+        args = []
+        cur_token = self.peek_next_token()
+        while cur_token.type != Token.Type.RP:
+            if not self.has_next_token():
+                raise self.syntax_error(rf'Token(RP) expected!')
+
+            cur_token = self.get_next_token()
+            if cur_token.type == Token.Type.IDN:
+                args.append(cur_token.value)
+                cur_token = self.peek_next_token()
+            elif cur_token.type != Token.Type.RP:
+                raise self.syntax_error(rf'Token(IDN) expected!')
+
+        self.cp += 1
+
+        cur_token = self.get_next_token()
+        if cur_token.type != Token.Type.LD:
+            raise self.syntax_error(rf'Token(LD) expected!')
+        sub_bodies = []
+        cur_token = self.peek_next_token()
+        while cur_token.type != Token.Type.RD:
+            sub_bodies.append(self.get_body())
+            if not self.has_next_token():
+                return FuncDef(func_name, args, sub_bodies)
+            cur_token = self.peek_next_token()
+        self.cp += 1
+        return FuncDef(func_name, args, sub_bodies)
+
     def get_body(self):
         cur_token = self.peek_next_token()
         if cur_token.type == Token.Type.IF:
             return self.get_if_else_body()
         elif cur_token.type == Token.Type.WHILE:
             return self.get_while_body()
+        elif cur_token.type == Token.Type.FUNC:
+            return self.get_func_body()
         return self.get_assign_stmt()
 
     def run(self):
@@ -661,18 +733,46 @@ class Agent:
 
 if __name__ == '__main__':
     s = '''
-    n=6
-    cnt=1
-    sum=1
-    while cnt<=n{
-        sum=sum*cnt
-        cnt=cnt+1
-    }
-    print(sum)
     
+    func sqrt(n){
+        x=1
+        new_x=n
+        while x!=new_x{
+            x=new_x
+            new_x=(x+n/x)/2
+        }
+        x
+    }
+    
+    func abs(n){
+        ret=n
+        if n<0{
+            ret=-n
+        }
+        ret
+    }
+    
+    func root(f lo hi){
+        mi=(lo+hi)/2
+        if (hi-lo)<0.000001{
+            ret=mi
+        }
+        elif f(lo)*f(mi)<=0{
+            ret=root(f lo mi)
+        }else{
+            ret=root(f mi hi)
+        }
+        ret
+    }
+    
+    func fff(n){
+        n*n-3
+    }
+    
+    print(root(fff 0 10))
+        
     '''
+
     tokens = get_tokens(s)
-    agent = Agent(tokens, {
-        'print': print,
-    })
+    agent = Agent(tokens)
     agent.run()
