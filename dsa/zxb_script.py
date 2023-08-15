@@ -429,7 +429,10 @@ class Agent:
                 if not self.has_next_token():
                     raise self.syntax_error(rf'Token(RP) expected!')
                 cur_token = self.peek_next_token()
-                if cur_token.type != Token.Type.RP:
+                if cur_token.type == Token.Type.COMMA:
+                    self.cp += 1
+                    cur_token = self.peek_next_token()
+                elif cur_token.type != Token.Type.RP:
                     args.append(self.get_expr())
 
             self.cp += 1
@@ -696,11 +699,10 @@ class Agent:
             cur_token = self.get_next_token()
             if cur_token.type == Token.Type.IDN:
                 args.append(cur_token.value)
-                cur_token = self.peek_next_token()
+            elif cur_token.type == Token.Type.COMMA:
+                pass
             elif cur_token.type != Token.Type.RP:
                 raise self.syntax_error(rf'Token(IDN) expected!')
-
-        self.cp += 1
 
         cur_token = self.get_next_token()
         if cur_token.type != Token.Type.LD:
@@ -734,25 +736,8 @@ class Agent:
 if __name__ == '__main__':
     s = '''
     
-    func sqrt(n){
-        x=1
-        new_x=n
-        while x!=new_x{
-            x=new_x
-            new_x=(x+n/x)/2
-        }
-        x
-    }
     
-    func abs(n){
-        ret=n
-        if n<0{
-            ret=-n
-        }
-        ret
-    }
-    
-    func root(f lo hi){
+    func root(f,lo,hi){
         mi=(lo+hi)/2
         if (hi-lo)<0.000001{
             ret=mi
@@ -760,16 +745,16 @@ if __name__ == '__main__':
         elif f(lo)*f(mi)<=0{
             ret=root(f lo mi)
         }else{
-            ret=root(f mi hi)
+            ret=root(f,mi,hi)
         }
         ret
     }
     
     func fff(n){
-        n*n-3
+        n*n-2
     }
     
-    print(root(fff 0 10))
+    print(root(fff,0,10))
         
     '''
 
