@@ -1,44 +1,34 @@
-import random
-from collections import deque
+import json
 
+import xmltodict
 
-def find_unique(nums: list):
-    a = 0
-    b = 0
-    for c in nums:
-        d = ~a & b & c | a & ~b & ~c
-        e = ~a & ~b & c | ~a & b & ~c
-        a = d
-        b = e
+s = '''
 
-    return b
+<bookstore id="111" id2="sd">
+    <book category="COOKING">
+        <title lang="en">Everyday Italian</title>
+        <author>Giada De Laurentiis</author>
+        <year>2005</year>
+        <price>30.00</price>
+    </book>
+    <book category="CHILDREN">
+        <title lang="en">Harry Potter</title>
+        <author>J K. Rowling</author>
+        <year>2005</year>
+        <price>29.99</price>
+    </book>
+    <book2 category="WEB">
+        <title lang="en">Learning XML</title>
+        <author>Erik T. Ray</author>
+        <year>2003</year>
+        <price>39.95&lt;</price>
+    </book2>
+    <!-- This is a comment -->
+</bookstore>
+        <!-- This is a comment -->
 
+'''
 
-if __name__ == '__main__':
-    nums = deque()
-    have_select = False
-    for i in range(100):
-        n = random.randint(0, 100)
-        is_tail = random.random()
+a = xmltodict.parse(s)
 
-        if is_tail < 0.5:
-            for k in range(3):
-                nums.append(n)
-        else:
-            for k in range(3):
-                nums.appendleft(n)
-
-        selected = random.random()
-        if not have_select and selected > 0.5:
-            have_select = True
-            is_tail = random.random()
-            n += 97
-            if is_tail < 0.5:
-                nums.append(n)
-
-            else:
-                nums.appendleft(n)
-
-            print(n)
-
-    print(find_unique(nums))
+print(json.dumps(a))

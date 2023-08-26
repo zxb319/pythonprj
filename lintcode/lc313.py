@@ -1,12 +1,3 @@
+a = b'\x12\x34\x56'
 
-class A:
-    def __init__(self):
-        pass
-
-    def value(self,a):
-        return a
-
-
-a=A()
-
-print(a.value(4))
+print('0x' + ''.join(hex(x)[2:] for x in a))

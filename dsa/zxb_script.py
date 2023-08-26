@@ -52,12 +52,12 @@ class Token:
 
     TOKEN_TYPE_REGS = [
         (Type.IDN, re.compile(r'[a-z_][a-z\d_]*', re.IGNORECASE | re.S)),
-        (Type.FLOAT, re.compile(r'(\d+\.\d*|\.\d+)(e[\+\-]?\d+)?', re.IGNORECASE | re.S)),
+        (Type.FLOAT, re.compile(r'(\d+\.\d*|\.\d+)(e[+\-]?\d+)?', re.IGNORECASE | re.S)),
         (Type.INT, re.compile(r'\d+', re.IGNORECASE | re.S)),
         (Type.STR, re.compile(r'''\"(\\\"|[^\"])*\"''', re.IGNORECASE | re.S)),
 
         (Type.ADD, re.compile(r'\+', re.IGNORECASE | re.S)),
-        (Type.SUB, re.compile(r'\-', re.IGNORECASE | re.S)),
+        (Type.SUB, re.compile(r'-', re.IGNORECASE | re.S)),
         (Type.POW, re.compile(r'\*\*', re.IGNORECASE | re.S)),
         (Type.MUL, re.compile(r'\*', re.IGNORECASE | re.S)),
         (Type.FLOOR_DIV, re.compile(r'//', re.IGNORECASE | re.S)),
@@ -75,9 +75,9 @@ class Token:
         (Type.LP, re.compile(r'\(', re.IGNORECASE | re.S)),
         (Type.RP, re.compile(r'\)', re.IGNORECASE | re.S)),
         (Type.LZ, re.compile(r'\[', re.IGNORECASE | re.S)),
-        (Type.RZ, re.compile(r'\]', re.IGNORECASE | re.S)),
+        (Type.RZ, re.compile(r']', re.IGNORECASE | re.S)),
         (Type.LD, re.compile(r'\{', re.IGNORECASE | re.S)),
-        (Type.RD, re.compile(r'\}', re.IGNORECASE | re.S)),
+        (Type.RD, re.compile(r'}', re.IGNORECASE | re.S)),
         (Type.COMMA, re.compile(r',', re.IGNORECASE | re.S)),
 
         (Type.WHITE, re.compile(r'\s+', re.IGNORECASE | re.S)),
@@ -736,44 +736,8 @@ class Agent:
 
 
 if __name__ == '__main__':
-    s = '''
-    
-    
-    func root(f,lo,hi){
-        mi=(lo+hi)/2
-        if (hi-lo)<0.000001{
-            ret=mi
-        }
-        elif f(lo)*f(mi)<=0{
-            ret=root(f lo mi)
-        }else{
-            ret=root(f,mi,hi)
-        }
-        ret
-    }
-    
-    func fff(n){
-        n*n-2
-    }
-    
-    func pow(b,p){
-        if p==0{
-            ret=1
-        }elif p%2==0{
-            ret=pow(b*b,p//2)
-        }else{
-            ret=b*pow(b,p-1)
-        }
-        ret
-    }
-    
-    func sd(){
-        2**10
-    }
-    
-    print(sd())
-        
-    '''
+    with open(r"C:\Users\zxb\Desktop\test.zxb", 'r', encoding='utf-8') as f:
+        s = f.read()
 
     tokens = get_tokens(s)
     agent = Agent(tokens)
