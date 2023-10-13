@@ -1,4 +1,5 @@
 import json
+import threading
 
 import requests
 
@@ -43,7 +44,27 @@ MONEYS = [
 ]
 
 if __name__ == '__main__':
-    res = [(m, get_huilv_per_cny(m)) for m in MONEYS]
-    res = sorted(res, key=lambda x: x[1], reverse=True)
-    for m, n in res:
-        print(m, n, f'1人民币\t==\t{round(1 / n, 2)}{m}',sep='\t')
+    import dsa.run_time
+
+    with dsa.run_time.CostTime() as a:
+        from concurrent.futures import ThreadPoolExecutor
+
+        thread_pool = ThreadPoolExecutor(len(MONEYS))
+        res = [(m, thread_pool.submit(get_huilv_per_cny, m)) for m in MONEYS]
+        thread_pool.shutdown()
+        res = [(m[0], m[1].result()) for m in res]
+        res = sorted(res, key=lambda x: x[1], reverse=True)
+        for m, n in res:
+            print(m, n, f'1人民币=={round(1 / n, 2)}{m}', sep='\t' * 3)
+
+    # with dsa.run_time.CostTime() as a:
+    #     import gevent
+    #     from gevent import monkey
+    #     monkey.patch_all()
+    #
+    #     res2 = [gevent.spawn(get_huilv_per_cny,m) for m in MONEYS]
+    #     gevent.joinall(res2)
+    #     res = [(m[0], m[1].value) for m in zip(MONEYS,res2)]
+    #     res = sorted(res, key=lambda x: x[1], reverse=True)
+    #     for m, n in res:
+    #         print(m, n, f'1人民币=={round(1 / n, 2)}{m}', sep='\t' * 3)

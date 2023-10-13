@@ -3,7 +3,7 @@ import re
 from typing import List, Union
 
 
-def indent(s: str, indent_count=1, space_count_per_indent=2):
+def indent(s: str, indent_count=1, space_count_per_indent=4):
     rows = s.split('\n')
     rows = [rf'{" " * space_count_per_indent * indent_count}{r}' for r in rows]
     return '\n'.join(rows)
@@ -11,7 +11,7 @@ def indent(s: str, indent_count=1, space_count_per_indent=2):
 
 class Element:
     """
-    名称 属性值 子节点|文本
+    名称 属性值
     """
 
     def __init__(self, tag, **attrs):
@@ -112,7 +112,7 @@ class Token:
 
     REGs = [
         (Type.COMMENT, re.compile(r'<!--((?!(<!--|-->)).)*-->', re.IGNORECASE | re.S)),
-        (Type.IDN, re.compile(r'[a-z_][a-z_\d]*', re.IGNORECASE | re.S)),
+        (Type.IDN, re.compile(r'[a-z_][a-z_\d:.\-]*', re.IGNORECASE | re.S)),
         (Type.STR, re.compile(r'"[^"]*"', re.IGNORECASE | re.S)),
         (Type.LT, re.compile(r'<', re.IGNORECASE | re.S)),
         (Type.GT, re.compile(r'>', re.IGNORECASE | re.S)),
@@ -191,10 +191,10 @@ class Parser:
         self.pos -= count
         return self.tokens[self.pos + count]
 
-    def get_declaration(self):
+    def get_declaration(self,tag_token_type:Token.Type):
         self.get_next_token(Token.Type.LT)
         self.get_next_token(Token.Type.QUESTION)
-        self.get_next_token(Token.Type.XML)
+        self.get_next_token(tag_token_type)
 
         attrs = {}
         cur_token = self.peek_next_token()
@@ -258,7 +258,7 @@ class Parser:
         declarations = {}
         self.pos -= 1
         if cur_token.type == Token.Type.QUESTION:
-            declarations = self.get_declaration()
+            declarations = self.get_declaration(Token.Type.XML)
         root_element = self.get_element()
 
         if self.pos < len(self.tokens):
@@ -268,34 +268,9 @@ class Parser:
 
 if __name__ == '__main__':
     s = '''
-<!--注释-->
-<?xml version="1.0" encoding="UT1F-8"?>
+    
+    
 
-<site>
-张新波
-  <name>RUNOOB</name>
-<!--注释-->
-  <url>https://www.runoob.com
-    
-<!--注释-->
-      <desc>
-        编程学习网站
-      </desc>
-  </url
-<!--注释---->>
-  dsds
-  <logo name ="ddssdd">
-  
-  
-  </logo>
-  <desc/>
-  sss
-</site>
-<!--
-sas
--->
-    
-    
     '''
 
     print(Xml.parse(s))
