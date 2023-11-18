@@ -3,8 +3,16 @@ import os
 
 
 def bigger(num):
-    new_num = num * 100
-    return new_num
+    # if num >= 50:
+    #     return num * 5
+    # new_num = num * 5
+    #
+    # if new_num <= 100:
+    #     return new_num
+    # else:
+    #     return 100
+
+    return num
 
 
 def keep(num):
@@ -33,7 +41,7 @@ def modify(line, current, comment, change_func):
 def modify_create_count(file_path):
     file_name = os.path.basename(file_path)
     if re.search(r'rawmaterial(wood|stone|iron|coal|herb|onion|blueberry|mushroom|root)', file_name, re.IGNORECASE):
-        change_func = keep
+        change_func = bigger
     else:
         change_func = bigger
 

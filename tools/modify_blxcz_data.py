@@ -5,7 +5,7 @@ import os
 def bigger(mul):
     def inner(num):
         new_num = num * mul
-        return new_num
+        return new_num if num >= 0 else -90
 
     return inner
 
@@ -21,7 +21,7 @@ def smaller(num):
 
 def modify(line, current, comment, change_func):
     if comment:
-        original = re.search(r'^<!--original is ([0-9]+)-->$', comment).group(1)
+        original = current
     else:
         original = current
 
@@ -34,55 +34,70 @@ def modify(line, current, comment, change_func):
     return ret
 
 
-def modify_capacity(file_path):
+def modify_building_product_count(file_path, to_path):
     lines = []
     modified_count = 0
+    in_produce = 0
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
             if line[-1] == '\n':
                 line = line[:-1]
+
+            if in_produce not in (0, 1):
+                raise Exception(rf'product标签有嵌套！')
+
+            reg = r'^\s*<Goods>\s*(<!--.+-->)?\s*$'
+            mat = re.search(reg, line, re.IGNORECASE)
+            if mat:
+                in_produce += 1
+
+            if in_produce == 1:
+                reg = r'^\s*<UnEducated>([0-9]+)</UnEducated>\s*(<!--.+-->)?\s*$'
+                mat = re.search(reg, line, re.IGNORECASE)
+                if mat:
+                    line = modify(line, mat.group(1), mat.group(2), bigger(2))
+                    modified_count += 1
+
+                reg = r'^\s*<Educated>([0-9]+)</Educated>\s*(<!--.+-->)?\s*$'
+                mat = re.search(reg, line, re.IGNORECASE)
+                if mat:
+                    line = modify(line, mat.group(1), mat.group(2), bigger(2))
+                    modified_count += 1
+
+                # reg = r'^\s*<Num>([0-9]+)</Num>\s*(<!--.+-->)?\s*$'
+                # mat = re.search(reg, line, re.IGNORECASE)
+                # if mat:
+                #     line = modify(line, mat.group(1), mat.group(2), bigger(2))
+                #     modified_count += 1
+
+            reg = r'^\s*</Goods>\s*(<!--.+-->)?\s*$'
+            mat = re.search(reg, line, re.IGNORECASE)
+            if mat:
+                in_produce -= 1
+
             reg = r'^\s*<CellStorageLimit>([0-9]+)</CellStorageLimit>\s*(<!--.+-->)?\s*$'
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
-                line = modify(line, mat.group(1), mat.group(2), bigger(1000))
+                print(line)
+                line = modify(line, mat.group(1), mat.group(2), bigger(2))
+                modified_count += 1
+                print(line)
+
+            reg = r'^\s*<StorageLimit>([0-9]+)</StorageLimit>\s*(<!--.+-->)?\s*$'
+            mat = re.search(reg, line, re.IGNORECASE)
+            if mat:
+                line = modify(line, mat.group(1), mat.group(2), bigger(2))
                 modified_count += 1
 
             lines.append(line)
 
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(to_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines))
 
     print(rf'{os.path.basename(file_path)} success, 修改了{modified_count}处')
 
 
-def modify_building_product_count(file_path):
-    lines = []
-    modified_count = 0
-    with open(file_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            if line[-1] == '\n':
-                line = line[:-1]
-            reg = r'^\s*<UnEducated>([0-9]+)</UnEducated>\s*(<!--.+-->)?\s*$'
-            mat = re.search(reg, line, re.IGNORECASE)
-            if mat:
-                line = modify(line, mat.group(1), mat.group(2), bigger(100))
-                modified_count += 1
-
-            reg = r'^\s*<Educated>([0-9]+)</Educated>\s*(<!--.+-->)?\s*$'
-            mat = re.search(reg, line, re.IGNORECASE)
-            if mat:
-                line = modify(line, mat.group(1), mat.group(2), bigger(100))
-                modified_count += 1
-
-            lines.append(line)
-
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
-
-    print(rf'{os.path.basename(file_path)} success, 修改了{modified_count}处')
-
-
-def modify_animal_product_count(file_path):
+def modify_animal_product_count(file_path, to_path):
     lines = []
     modified_count = 0
     in_produce = 0
@@ -103,13 +118,13 @@ def modify_animal_product_count(file_path):
                 reg = r'^\s*<Lower>([0-9]+)</Lower>\s*(<!--.+-->)?\s*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), mat.group(2), bigger(100))
+                    line = modify(line, mat.group(1), mat.group(2), bigger(2))
                     modified_count += 1
 
                 reg = r'^\s*<Upper>([0-9]+)</Upper>\s*(<!--.+-->)?\s*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), mat.group(2), bigger(100))
+                    line = modify(line, mat.group(1), mat.group(2), bigger(2))
                     modified_count += 1
 
             reg = r'^\s*</Produce>\s*(<!--.+-->)?\s*$'
@@ -119,13 +134,13 @@ def modify_animal_product_count(file_path):
 
             lines.append(line)
 
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(to_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines))
 
     print(rf'{os.path.basename(file_path)} success, 修改了{modified_count}处')
 
 
-def modify_resource_product_count(file_path):
+def modify_resource_product_count(file_path, to_path):
     lines = []
     modified_count = 0
     in_produce = 0
@@ -137,7 +152,12 @@ def modify_resource_product_count(file_path):
             if in_produce not in (0, 1):
                 raise Exception(rf'product标签有嵌套！')
 
-            reg = r'^\s*<FinishRes>\s*(<!--.+-->)?\s*$'
+            reg = r'^\s*<NumRange>\s*(<!--.+-->)?\s*$'
+            mat = re.search(reg, line, re.IGNORECASE)
+            if mat:
+                in_produce += 1
+
+            reg = r'^\s*<UnEducatedNumRange>\s*(<!--.+-->)?\s*$'
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
                 in_produce += 1
@@ -146,23 +166,28 @@ def modify_resource_product_count(file_path):
                 reg = r'^\s*<Lower>([0-9]+)</Lower>\s*(<!--.+-->)?\s*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), mat.group(2), bigger(100))
+                    line = modify(line, mat.group(1), mat.group(2), bigger(2))
                     modified_count += 1
 
                 reg = r'^\s*<Upper>([0-9]+)</Upper>\s*(<!--.+-->)?\s*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), mat.group(2), bigger(100))
+                    line = modify(line, mat.group(1), mat.group(2), bigger(2))
                     modified_count += 1
 
-            reg = r'^\s*</FinishRes>\s*(<!--.+-->)?\s*$'
+            reg = r'^\s*</NumRange>\s*(<!--.+-->)?\s*$'
+            mat = re.search(reg, line, re.IGNORECASE)
+            if mat:
+                in_produce -= 1
+
+            reg = r'^\s*</UnEducatedNumRange>\s*(<!--.+-->)?\s*$'
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
                 in_produce -= 1
 
             lines.append(line)
 
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(to_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines))
 
     print(rf'{os.path.basename(file_path)} success, 修改了{modified_count}处')
@@ -170,14 +195,20 @@ def modify_resource_product_count(file_path):
 
 if __name__ == '__main__':
     file_path = os.path.realpath(
+        r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\Building - 副本.xml")
+    file_path2 = os.path.realpath(
         r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\Building.xml")
-    modify_capacity(file_path)
-    modify_building_product_count(file_path)
+    # modify_capacity(file_path, file_path2)
+    modify_building_product_count(file_path, file_path2)
 
     file_path = os.path.realpath(
+        r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\Animal - 副本.xml")
+    file_path2 = os.path.realpath(
         r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\Animal.xml")
-    modify_animal_product_count(file_path)
+    modify_animal_product_count(file_path, file_path2)
 
     file_path = os.path.realpath(
+        r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\ResAttribute - 副本.xml")
+    file_path2 = os.path.realpath(
         r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\ResAttribute.xml")
-    modify_resource_product_count(file_path)
+    modify_resource_product_count(file_path, file_path2)

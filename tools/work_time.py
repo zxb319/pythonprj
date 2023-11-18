@@ -1,11 +1,53 @@
+import base64
 import datetime
 import getpass
 import json
 import os.path
+import random
 import re
 import time
+import urllib.parse
 
 import requests
+requests.packages.urllib3.disable_warnings()
+
+import Crypto.Random
+
+from Crypto.Cipher import PKCS1_v1_5
+from Crypto.PublicKey import RSA
+
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
+
+def generate_aes_key(size=16):
+    a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
+    r = [a[random.Random().randint(0, len(a) - 1)] for i in range(size)]
+    return ''.join(r).encode('utf-8')
+
+
+def aes_encrypt(msg, key):
+    aes = AES.new(key, AES.MODE_ECB)
+    if isinstance(msg, str):
+        msg = msg.encode('utf-8')
+    # msg=base64.b64encode(msg)
+    padded_msg = pad(msg, AES.block_size)
+    r = aes.encrypt(padded_msg)
+    return base64.b64encode(r).decode('utf-8')
+
+
+def rsa_encrypt(msg, pub_key):
+    pub_key = rf'''-----BEGIN RSA PUBLIC KEY-----
+{pub_key}
+-----END RSA PUBLIC KEY-----'''
+    pub_key = RSA.import_key(pub_key)
+    rsa = PKCS1_v1_5.new(pub_key)
+    if isinstance(msg, str):
+        msg = msg.encode('utf-8')
+    encrypted = rsa.encrypt(msg)
+    encrypted = base64.b64encode(encrypted).decode('utf-8')
+    return encrypted
+
 
 except_holidays = {
     '2022-09-12', '2022-10-03', '2022-10-04', '2022-10-05', '2022-10-06', '2022-10-07',
@@ -38,13 +80,37 @@ def get_token(user_id, user_password):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36 Edg/103.0.1264.71',
     }
+
+    url = rf'https://ics.chinasoftinc.com/r1portal/getPublicKey'
+    resp = session.get(url, headers=headers, verify=False, allow_redirects=False)
+    res = json.loads(resp.text)
+    rsaPublicKey = res['data']['rsaPublicKey']
+
+    aes_key = generate_aes_key(16)
+    # print(aes_key)
+    # print(rsaPublicKey)
+    # print(user_id)
+    # print(user_password)
+    aes_encrypted_user_id = aes_encrypt(user_id, aes_key)
+    aes_encrypted_user_pwd = aes_encrypt(user_password, aes_key)
+    rsa_encrypted_aes_key = rsa_encrypt(aes_key, rsaPublicKey)
+
     data = {
-        'userName': user_id,
-        'j_username': user_id,
-        'password': user_password,
-        'j_password': user_password,
+        'encryptKey': 'pteZF5GTC5qsvV513%2FTCuh9sPy3wWme990d6udH5zrehN4bcvWHHmrj0UtidgbEsRbvM2zgsyS9TOEB21y7ahETpk0h0o1W%2F4Q2tBcBYu8A76aabeRx82kCUt7J4aTz1fxOx088PYTorCpOXh%2FkDZIFN3gbFWsytphm835E6HqI%3D',
+        'headAgreement': 'https',
+        'linkpage': '',
+        'userName': 'lUGQg3J%2B2K5pJgZAIN72ow%3D%3D',
+        'password': 'YjyIrz9OLv8CLeny2AMYVg%3D%3D',
     }
-    res = session.post("http://ics.chinasoftinc.com/r1portal/login", allow_redirects=True, data=data, headers=headers)
+    data = {
+        'encryptKey': urllib.parse.quote(rsa_encrypted_aes_key),
+        'headAgreement': 'https',
+        'linkpage': '',
+        'userName': urllib.parse.quote(aes_encrypted_user_id),
+        'password': urllib.parse.quote(aes_encrypted_user_pwd),
+    }
+
+    res = session.post("https://ics.chinasoftinc.com/r1portal/login", allow_redirects=True, data=data, headers=headers)
 
     url = re.search(r'\'([^\']+)\'', res.text).group(1)
 
@@ -54,26 +120,26 @@ def get_token(user_id, user_password):
     headers['ROLTPAToken'] = session.cookies.get('ROLTPAToken')
     headers['Content-Type'] = 'application/json;charset=UTF-8'
     headers['Host'] = 'ics.chinasoftinc.com'
-    headers['Origin'] = 'http://ics.chinasoftinc.com'
+    headers['Origin'] = 'https://ics.chinasoftinc.com'
     headers['X-Requested-With'] = 'XMLHttpRequest'
 
-    url = 'http://ics.chinasoftinc.com/elp/getUserProtocol'
+    url = 'https://ics.chinasoftinc.com/elp/getUserProtocol'
     data = {"tacticsStatus": 2}
     res = session.post(url=url, json=data, headers=headers, cookies=session.cookies)
 
-    url = 'http://ics.chinasoftinc.com:8010/sso/toLoginYellow'
-    res = session.get(url=url, headers=headers, cookies=session.cookies, allow_redirects=False)
+    url = 'https://yihr.chinasoftinc.com:18010/sso/toLogin'
+    res = session.get(url=url, headers=headers, cookies=session.cookies, allow_redirects=False, verify=False)
 
     url = res.headers.get('Location')
+
     empCode = re.search(r'empCode=(.+)$', res.headers.get('Location')).group(1)
 
     res = session.get(url, headers=headers, cookies=session.cookies)
 
     headers['Referer'] = url
 
-    res = session.post(url='http://ics.chinasoftinc.com:8010/ehr_saas/web/user/loginByEmpCode.jhtml',
-                       json={'empCode': empCode}, headers=headers, cookies=session.cookies)
-
+    res = session.post(url='https://yihr.chinasoftinc.com:18010/ehr_saas/web/user/loginByEmpCode.jhtml',
+                       json={'empCode': empCode}, headers=headers, cookies=session.cookies, verify=False)
     res = json.loads(res.text)
     token = res.get('result').get('data').get('token')
 
@@ -82,12 +148,12 @@ def get_token(user_id, user_password):
 
 
 def get_work_time_details(session, headers, months):
-    url = 'http://ics.chinasoftinc.com:8010/ehr_saas/web/icssAttEmpDetail/getLocSetDataByPage.empweb'
+    url = 'https://yihr.chinasoftinc.com:18010/ehr_saas/web/icssAttEmpDetail/getLocSetDataByPage.empweb'
     headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
     months_records = {}
     for month in months:
         data = f'pageIndex=1&pageSize=100&search=%7B%22dt%22%3A%22{month}%22%7D'
-        res = session.post(url=url, data=data, headers=headers)
+        res = session.post(url=url, data=data, headers=headers, verify=False)
         res = json.loads(res.text)
         records = res.get('result').get('data').get('page').get('items')
         months_records[month] = records
@@ -187,12 +253,13 @@ def compute(records):
 
     lack_time += days_count * 0.5
     if lack_time > 0:
-        print(f'平均工时要达到8.5，缺工时: {round_(lack_time)} 小时,即 {round_(lack_time * 60)} 分')
+        print(f'要达到8.5，缺工时: {round_(lack_time)} 小时,即 {round_(lack_time * 60)} 分')
     else:
         print(f'已满足8.5，且超过: {round_(-lack_time)} 小时,即 {round_(-lack_time * 60)} 分')
 
     first_day = datetime.date(int(cur_month[:4]), int(cur_month[-2:]), 1)
-    all_workdays = {str(d) for d in (first_day + datetime.timedelta(days=i) for i in range(31)) if is_workday(str(d)) and d.month == int(cur_month[-2:])}
+    all_workdays = {str(d) for d in (first_day + datetime.timedelta(days=i) for i in range(31)) if
+                    is_workday(str(d)) and d.month == int(cur_month[-2:])}
     exception_data = [(k, v) for k, v in data.items() if min(v)[-8:] > '09:00:00' or max(v)[-8:] < '17:30:00' and today != k]
     exception_data += [(d, []) for d in all_workdays if d <= today and d not in data]
     if len(exception_data) > 0:
@@ -200,10 +267,8 @@ def compute(records):
         for ed in sorted(exception_data):
             print(ed[0], [x[-8:] for x in ed[1]])
 
-    print(f'当天打卡：')
+    print(f'打卡记录：')
     for k, v in data.items():
-        if k != today:
-            continue
         print(k, '\t'.join([x[-8:] for x in v]), round_(daily_work_times.get(k)), sep='\t')
 
     if today in all_workdays and today not in daily_work_times:
@@ -212,8 +277,10 @@ def compute(records):
         if to_time < now:
             to_time = now
         daily_work_times[today] = work_time(from_time, to_time)
-        print(f'\n如果{to_time}下班，平均工时：{sum(v for v in daily_work_times.values()) / len(daily_work_times)}')
+        print(f'\n如果{to_time[11:]}下班，平均工时：{round_(sum(v for v in daily_work_times.values()) / len(daily_work_times))}')
     print()
+    compute_plan_work_times(7, daily_work_times, today, all_workdays)
+    compute_plan_work_times(7+1/12, daily_work_times, today, all_workdays)
     compute_plan_work_times(7.5, daily_work_times, today, all_workdays)
     compute_plan_work_times(8, daily_work_times, today, all_workdays)
     compute_plan_work_times(8.5, daily_work_times, today, all_workdays)

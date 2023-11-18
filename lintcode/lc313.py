@@ -1,19 +1,11 @@
+import os
 
-s='''
-<books name="aaa">
-    <a value="1"></a>
-    <b value="2"></b>
-    <c value="3"></c>
-    <d value="4"></d>
-    <e value="5"></e>
-    <f value="6"></f>
-</books>
-'''
+folder_path=rf'D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig'
 
-import xml.dom.minidom as minidom
-
-xml_obj=minidom.parseString(s)
-
-print(*sorted(dir(xml_obj)),sep='\n')
-
-print(xml_obj.childNodes[0].childNodes)
+for f in os.listdir(folder_path):
+    fp=os.path.join(folder_path,f)
+    if os.path.isdir(fp):
+        continue
+    with open(fp,'r',encoding='utf-8') as ff:
+        if '法令' in ff.read():
+            print(f)
