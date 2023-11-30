@@ -37,9 +37,10 @@ def aes_encrypt(msg, key):
 
 
 def rsa_encrypt(msg, pub_key):
-    pub_key = rf'''-----BEGIN RSA PUBLIC KEY-----
+    pub_key = rf'''
+-----BEGIN RSA PUBLIC KEY-----
 {pub_key}
------END RSA PUBLIC KEY-----'''
+-----END RSA PUBLIC KEY-----'''.strip()
     pub_key = RSA.import_key(pub_key)
     rsa = PKCS1_v1_5.new(pub_key)
     if isinstance(msg, str):

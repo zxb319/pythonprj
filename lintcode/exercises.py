@@ -1,5 +1,2 @@
-import re
 
-a=re.split(r'点','ssss点')
-
-print(a)
+print(12*102+32*11)

@@ -22,12 +22,14 @@ def aes_encrypt(msg, key):
     padded_msg = pad(msg, AES.block_size)
     return aes.encrypt(padded_msg)
 
+
 def aes_decrypt(msg, key):
     aes = AES.new(key, AES.MODE_CBC)
     if isinstance(msg, str):
         msg = msg.encode('utf-8')
     padded_msg = pad(msg, AES.block_size)
     return aes.decrypt(padded_msg)
+
 
 def rsa_encrypt(msg, pub_key):
     pub_key = rf'''-----BEGIN RSA PUBLIC KEY-----
@@ -92,5 +94,5 @@ class Agent:
 
 
 if __name__ == '__main__':
-    a='jddEEO08YSwSRAfUtnTrKA=='
+    a = 'jddEEO08YSwSRAfUtnTrKA=='
     print(base64.b64decode(a))
