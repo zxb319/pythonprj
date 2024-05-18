@@ -142,7 +142,7 @@ def bytes_to_payload(bytes_, payload):
             return ret
 
         else:
-            raise Exception(rf'unkonwn payload type {type(payload)}')
+            raise Exception(rf'unknown payload type {type(payload)}')
 
     ret = _parse_bytes(payload)
     if pos != len(bytes_):
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         "d": BaseDataPayload(-1, BaseType.SINT8),
         "c": BaseDataPayload(2, BaseType.UINT16),
         "bb": StructPayload({
-            'aa': ArrayPayload([StringPayload("zxb")] * 3)
+            'aa': ArrayPayload([StringPayload("zxb"), ] * 3)
         }),
         "a": BaseDataPayload(4, BaseType.UINT64),
     })
@@ -164,7 +164,6 @@ if __name__ == '__main__':
     bytes_p = bytes(p)
 
     print(bytes_p)
-
 
     p1 = StructPayload({
         "d": BaseDataPayload(0, BaseType.SINT8),
