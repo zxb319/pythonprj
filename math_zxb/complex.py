@@ -43,7 +43,7 @@ class Complex:
         res = arcsine(self._imag / length)
         if self._real >= 0 and self._imag >= 0:
             return res
-        elif self._real < 0 and self._imag >= 0:
+        elif self._real < 0 <= self._imag:
             return PI - res
         elif self._real < 0 and self._imag < 0:
             return PI - res

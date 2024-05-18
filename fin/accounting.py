@@ -1,3 +1,13 @@
+"""
+资产+费用=所有者权益+负债+收入
+"""
+
+
+class BalanceSheet:
+    def __init__(self):
+        pass
+
+
 def make_balance_sheet(initial_balance_sheet: dict, accounting_events: list):
     for event in accounting_events:
         """(科目，明细，科目，明细，金额)"""
@@ -19,39 +29,39 @@ def make_balance_sheet(initial_balance_sheet: dict, accounting_events: list):
     return initial_balance_sheet
 
 
-def print_banlance_sheet(banlance_sheet: dict):
+def print_balance_sheet(balance_sheet: dict):
     print('资产:')
-    for itm in banlance_sheet['资产'].items():
+    for itm in balance_sheet['资产'].items():
         print(itm[0], itm[1])
 
     print('负债:')
-    for itm in banlance_sheet['负债'].items():
+    for itm in balance_sheet['负债'].items():
         print(itm[0], itm[1])
 
     print('所有者权益:')
-    for itm in banlance_sheet['所有者权益'].items():
+    for itm in balance_sheet['所有者权益'].items():
         print(itm[0], itm[1])
 
     print('收入:')
-    for itm in banlance_sheet['收入'].items():
+    for itm in balance_sheet['收入'].items():
         print(itm[0], itm[1])
 
     print('费用:')
-    for itm in banlance_sheet['费用'].items():
+    for itm in balance_sheet['费用'].items():
         print(itm[0], itm[1])
 
-    print('资产费用总计:', sum(v for v in banlance_sheet['资产'].values())
-          + sum(v for v in banlance_sheet['费用'].values())
+    print('资产费用总计:', sum(v for v in balance_sheet['资产'].values())
+          + sum(v for v in balance_sheet['费用'].values())
           )
     print('负债加所有者权益:',
-          sum(v for v in banlance_sheet['负债'].values())
-          + sum(v for v in banlance_sheet['所有者权益'].values())
-          + sum(v for v in banlance_sheet['收入'].values())
+          sum(v for v in balance_sheet['负债'].values())
+          + sum(v for v in balance_sheet['所有者权益'].values())
+          + sum(v for v in balance_sheet['收入'].values())
           )
 
 
 if __name__ == '__main__':
-    initial_banlance_sheet = {
+    initial_balance_sheet1 = {
         '资产': {
             '库存现金': 2000,
             '银行存款': 50000,
@@ -77,7 +87,7 @@ if __name__ == '__main__':
         '费用': {},
     }
 
-    accounting_events = [
+    accounting_events1 = [
         ('资产', '原材料', '负债', '应付账款', 5000),
         ('负债', '短期借款', '资产', '银行存款', 20000),
         ('资产', '银行存款', '资产', '应收账款', 10000),
@@ -92,7 +102,7 @@ if __name__ == '__main__':
 
     ]
 
-    # print_banlance_sheet(initial_banlance_sheet)
-    banlance_sheet = make_balance_sheet(initial_banlance_sheet, accounting_events)
+    # print_balance_sheet(initial_balance_sheet)
+    balance_sheet1 = make_balance_sheet(initial_balance_sheet1, accounting_events1)
 
-    print_banlance_sheet(banlance_sheet)
+    print_balance_sheet(balance_sheet1)

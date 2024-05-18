@@ -23,5 +23,5 @@ class UdpClient:
 
 
 if __name__ == '__main__':
-    server=UdpServer('0.0.0.0',9999)
+    server=UdpServer('192.168.1.6',30501)
     server.run()

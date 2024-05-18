@@ -44,50 +44,56 @@ def modify_building_product_count(file_path, to_path):
                 print(i + 1, in_produce, line)
                 raise Exception(rf'product标签有嵌套！')
 
-            reg = r'^.*<ConsumeAddAbility>.*$'
+            reg = r'^.*<Goods>.*$'
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
-                print(i + 1, line)
                 in_produce += 1
 
             if in_produce == 1:
                 reg = r'^.*<UnEducated>([0-9]+)</UnEducated>.*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), bigger(10))
+                    line = modify(line, mat.group(1), bigger(100))
                     modified_count += 1
 
                 reg = r'^.*<Educated>([0-9]+)</Educated>.*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), bigger(10))
+                    line = modify(line, mat.group(1), bigger(100))
                     modified_count += 1
 
-                reg = r'^.*<Num>([0-9]+)</Num>.*$'
-                mat = re.search(reg, line, re.IGNORECASE)
-                if mat:
-                    line = modify(line, mat.group(1), bigger(10))
-                    modified_count += 1
-
-            reg = r'^.*</ConsumeAddAbility>.*$'
+            reg = r'^.*</Goods>.*$'
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
-                print(i + 1, line)
                 in_produce -= 1
 
             reg = r'^.*<CellStorageLimit>([0-9]+)</CellStorageLimit>.*$'
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
                 # print(line)
-                line = modify(line, mat.group(1), bigger(10))
+                line = modify(line, mat.group(1), bigger(1000))
                 modified_count += 1
                 print(line)
 
-            reg = r'^.*<StorageLimit>([0-9]+)</StorageLimit>.*$'
+            reg = r'^.*<EducatedWork>([0-9]+)</EducatedWork>.*$'
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
+                # print(line)
                 line = modify(line, mat.group(1), bigger(10))
                 modified_count += 1
+
+            reg = r'^.*<UnEducatedWork>([0-9]+)</UnEducatedWork>.*$'
+            mat = re.search(reg, line, re.IGNORECASE)
+            if mat:
+                # print(line)
+                line = modify(line, mat.group(1), bigger(10))
+                modified_count += 1
+
+            # reg = r'^.*<StorageLimit>([0-9]+)</StorageLimit>.*$'
+            # mat = re.search(reg, line, re.IGNORECASE)
+            # if mat:
+            #     line = modify(line, mat.group(1), bigger(10))
+            #     modified_count += 1
 
             lines.append(line)
 
@@ -196,7 +202,8 @@ def modify_building_product_count(file_path, to_path):
 
 if __name__ == '__main__':
     file_path = os.path.realpath(
-        r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\Building - 副本.xml")
+        r"D:\Program Files (x86)\Steam\steamapps"
+        r"\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\Building - 副本.xml")
     file_path2 = os.path.realpath(
         r"D:\Program Files (x86)\Steam\steamapps\common\Settlement Survival\Settlement Survival_Data\StreamingAssets\zipConfig\Building.xml")
     # modify_capacity(file_path, file_path2)

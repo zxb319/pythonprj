@@ -13,8 +13,8 @@ NINE = '玖九'
 TEN = '拾十'
 HUNDRED = '佰百'
 THOUSAND = '仟千'
-TEN_THOUSAND = '萬万'
-HUNDRED_MILLION = '億亿'
+TEN_THOUSAND = '万萬'
+HUNDRED_MILLION = '亿億'
 
 CHNS_MAP = {
     0: ZERO,
@@ -184,7 +184,4 @@ def chn2num(chn: str):
 
 
 if __name__ == '__main__':
-    for i in range(20000):
-        a = _num2chn(i)
-        b = chn2num(a)
-        print(a, b)
+    print(chn2num('亿'))

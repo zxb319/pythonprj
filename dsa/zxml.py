@@ -1,6 +1,6 @@
 import enum
 import re
-from typing import List, Union
+from typing import List
 
 
 def indent(s: str, indent_count=1, space_count_per_indent=4):

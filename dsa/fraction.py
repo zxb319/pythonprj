@@ -71,7 +71,4 @@ class Fraction:
 
 
 if __name__ == '__main__':
-    f0 = Fraction(2244851485148514627, 8118811881188118000)
-    f1 = Fraction(3, 9)
-
-    print(f0)
+    print(Fraction(112345679,1000))

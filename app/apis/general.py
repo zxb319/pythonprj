@@ -21,13 +21,15 @@ general = Blueprint('general', url_prefix='/', import_name=__name__)
 def heartbeat():
     return tools.json_response(data='server running normal!')
 
+
 @general.route('/tool_env', methods=['GET'])
 def tool_env():
-    ip='192.168.1.4'
-    port=22
-    user='zxb'
-    pwd='zxb319'
-    return redirect(rf'http://127.0.0.1:9999/?hostname={ip}&username={user}&password={base64.b64encode(pwd.encode()).decode()}&port={port}&title=tool_env')
+    ip = '192.168.1.4'
+    port = 22
+    user = 'zxb'
+    pwd = 'zxb319'
+    return redirect(
+        rf'http://127.0.0.1:9999/?hostname={ip}&username={user}&password={base64.b64encode(pwd.encode()).decode()}&port={port}&title=tool_env')
 
 
 @general.route('/shicis/', methods=['GET'])
@@ -37,7 +39,8 @@ def get_shicis():
     query = db.session.query(Shici.id, Shici.title, Shici.author, Shici.chaodai, Shici.content)
 
     if key_word:
-        query = query.filter(or_(Shici.title.like(f'%{key_word}%'), Shici.author.like(f'%{key_word}%'), Shici.content.like(f'%{key_word}%')))
+        query = query.filter(or_(Shici.title.like(f'%{key_word}%'), Shici.author.like(f'%{key_word}%'),
+                                 Shici.content.like(f'%{key_word}%')))
     else:
         key_word = ''
     res = query.offset((cur_page - 1) * page_size).limit(page_size).all()
@@ -67,8 +70,10 @@ def get_shicis():
     total = query.count()
     page_count = math.ceil(total / page_size)
     tb = Table()
-    last = Href('上一页', f'/shicis/?cur_page={cur_page - 1}&page_size={page_size}&key_word={key_word}') if cur_page > 1 else ''
-    next = Href('下一页', f'/shicis/?cur_page={cur_page + 1}&page_size={page_size}&key_word={key_word}') if cur_page < page_count else ''
+    last = Href('上一页',
+                f'/shicis/?cur_page={cur_page - 1}&page_size={page_size}&key_word={key_word}') if cur_page > 1 else ''
+    next = Href('下一页',
+                f'/shicis/?cur_page={cur_page + 1}&page_size={page_size}&key_word={key_word}') if cur_page < page_count else ''
     tb.append(Row(last, next, rf'共{page_count}页{total}条'))
     ht.append(tb)
     return Response(str(ht))
@@ -77,7 +82,8 @@ def get_shicis():
 @general.route('/shici/', methods=['GET'])
 def get_shici():
     id = tools.get_arg('id')
-    res = db.session.query(Shici.id, Shici.title, Shici.author, Shici.chaodai, Shici.content).filter(Shici.id == id).all()
+    res = db.session.query(Shici.id, Shici.title, Shici.author, Shici.chaodai, Shici.content).filter(
+        Shici.id == id).all()
     if not res:
         return Response(rf'id={id}的数据不存在！', status=404)
     tb = Table()
@@ -112,7 +118,8 @@ def get_fs():
     tb.set_head(HeadRow('类型', '文件名', '修改时间'))
     for fn, dir_ in ROOT_MAP.items():
         abs_path = rf'/fs/{fn}'
-        tb.append(Row('文件夹' if os.path.isdir(dir_) else '文件', Href(fn, abs_path), file_modified_time_str(dir_)))
+        tb.append(Row('文件夹' if os.path.isdir(dir_) else '文件', Href(fn, abs_path),
+                      file_modified_time_str(dir_)))
     return Response(str(tb))
 
 

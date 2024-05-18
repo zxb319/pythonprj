@@ -2,8 +2,6 @@ import random
 import math
 from typing import Callable
 
-import numba
-
 import dsa.run_time
 
 
@@ -13,7 +11,7 @@ def differential(f: Callable[[float], float], x: float):
 
 
 def integral(func: Callable[[float], float], lo: float, hi: float):
-    n = 1_0000
+    n = 100_0000
     delta = (hi - lo) / n
     res = 0
     for i in range(n):
@@ -76,5 +74,8 @@ def particle_swarm_optimize(func: Callable, start_area):
 
 
 if __name__ == '__main__':
-    a = root_binarily(lambda x: math.sin(x), 1, 4)
-    print(a)
+    r = integral(lambda x: (1 + x ** 2 / (1 - x ** 2)) ** 0.5, 0, 1 - (1e-10))
+    print(2 * r)
+
+    r = integral(lambda x: (1 - x ** 2) ** 0.5, 0, 1 - 1e-10)
+    print(4 * r)

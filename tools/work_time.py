@@ -9,6 +9,7 @@ import time
 import urllib.parse
 
 import requests
+
 requests.packages.urllib3.disable_warnings()
 
 import Crypto.Random
@@ -51,29 +52,29 @@ def rsa_encrypt(msg, pub_key):
 
 
 except_holidays = {
-    '2022-09-12', '2022-10-03', '2022-10-04', '2022-10-05', '2022-10-06', '2022-10-07',
-    '2023-01-02', '2023-01-23', '2023-01-24', '2023-01-25', '2023-01-26', '2023-01-27',
-    '2023-04-05',
-    '2023-05-01', '2023-05-02', '2023-05-03',
-    '2023-06-22', '2023-06-23',
-    '2023-09-29',
-    '2023-10-02', '2023-10-03', '2023-10-04', '2023-10-05', '2023-10-06',
+    '2024-01-01',
+    '2024-02-10', '2024-02-11', '2024-02-12', '2024-02-13', '2024-02-14', '2024-02-15', '2024-02-16', '2024-02-09',
+    '2024-04-04', '2024-04-05', '2024-04-06',
+    '2024-05-01', '2024-05-02', '2024-05-03', '2024-05-04', '2024-05-05',
+    '2024-06-08', '2024-06-09', '2024-06-10',
+    '2024-09-15', '2024-09-16', '2024-09-17',
+    '2024-10-01', '2024-10-02', '2024-10-03', '2024-10-04', '2024-10-05', '2024-10-06', '2024-10-07',
 }
 
 except_workdays = {
-    '2022-10-08', '2022-10-09',
-    '2023-01-28', '2023-01-29',
-    '2023-04-23',
-    '2023-05-06',
-    '2023-06-25',
-    '2023-10-07', '2023-10-08',
+    '2024-02-04', '2024-02-17', '2024-02-18',
+    '2024-04-07', '2024-04-28',
+    '2024-05-11',
+    '2024-09-14', '2024-09-29',
+    '2024-10-12',
 }
 
 date_format_str = '%Y-%m-%d'
 
 
 def is_workday(d):
-    return datetime.datetime.strptime(d, date_format_str).weekday() in (0, 1, 2, 3, 4) and d not in except_holidays or d in except_workdays
+    return (datetime.datetime.strptime(d, date_format_str).weekday() in (0, 1, 2, 3, 4) and d not in except_holidays
+            or d in except_workdays)
 
 
 def get_token(user_id, user_password):
@@ -82,7 +83,7 @@ def get_token(user_id, user_password):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36 Edg/103.0.1264.71',
     }
 
-    url = rf'https://ics.chinasoftinc.com/r1portal/getPublicKey'
+    url=  rf'https://ics.chinasoftinc.com/f3-portal-api/getPublicKey'
     resp = session.get(url, headers=headers, verify=False, allow_redirects=False)
     res = json.loads(resp.text)
     rsaPublicKey = res['data']['rsaPublicKey']
@@ -96,13 +97,13 @@ def get_token(user_id, user_password):
     aes_encrypted_user_pwd = aes_encrypt(user_password, aes_key)
     rsa_encrypted_aes_key = rsa_encrypt(aes_key, rsaPublicKey)
 
-    data = {
-        'encryptKey': 'pteZF5GTC5qsvV513%2FTCuh9sPy3wWme990d6udH5zrehN4bcvWHHmrj0UtidgbEsRbvM2zgsyS9TOEB21y7ahETpk0h0o1W%2F4Q2tBcBYu8A76aabeRx82kCUt7J4aTz1fxOx088PYTorCpOXh%2FkDZIFN3gbFWsytphm835E6HqI%3D',
-        'headAgreement': 'https',
-        'linkpage': '',
-        'userName': 'lUGQg3J%2B2K5pJgZAIN72ow%3D%3D',
-        'password': 'YjyIrz9OLv8CLeny2AMYVg%3D%3D',
-    }
+    # data = {
+    #     'encryptKey': 'pteZF5GTC5qsvV513%2FTCuh9sPy3wWme990d6udH5zrehN4bcvWHHmrj0UtidgbEsRbvM2zgsyS9TOEB21y7ahETpk0h0o1W%2F4Q2tBcBYu8A76aabeRx82kCUt7J4aTz1fxOx088PYTorCpOXh%2FkDZIFN3gbFWsytphm835E6HqI%3D',
+    #     'headAgreement': 'https',
+    #     'linkpage': '',
+    #     'userName': 'lUGQg3J%2B2K5pJgZAIN72ow%3D%3D',
+    #     'password': 'YjyIrz9OLv8CLeny2AMYVg%3D%3D',
+    # }
     data = {
         'encryptKey': urllib.parse.quote(rsa_encrypted_aes_key),
         'headAgreement': 'https',
@@ -111,11 +112,12 @@ def get_token(user_id, user_password):
         'password': urllib.parse.quote(aes_encrypted_user_pwd),
     }
 
-    res = session.post("https://ics.chinasoftinc.com/r1portal/login", allow_redirects=True, data=data, headers=headers)
+    res = session.post("https://ics.chinasoftinc.com/f3-portal-api/login", allow_redirects=True,
+                       data=data, headers=headers)
+    # print(res.text)
+    # url = re.search(r'\'([^\']+)\'', res.text).group(1)
 
-    url = re.search(r'\'([^\']+)\'', res.text).group(1)
-
-    res = session.get(url, headers=headers)
+    res = session.get(rf'https://ics.chinasoftinc.com/index.html', headers=headers)
 
     headers['Referer'] = url
     headers['ROLTPAToken'] = session.cookies.get('ROLTPAToken')
@@ -129,7 +131,8 @@ def get_token(user_id, user_password):
     res = session.post(url=url, json=data, headers=headers, cookies=session.cookies)
 
     url = 'https://yihr.chinasoftinc.com:18010/sso/toLogin'
-    res = session.get(url=url, headers=headers, cookies=session.cookies, allow_redirects=False, verify=False)
+    res = session.get(url=url, headers=headers, cookies=session.cookies, allow_redirects=False,
+                      verify=False)
 
     url = res.headers.get('Location')
 
@@ -139,8 +142,9 @@ def get_token(user_id, user_password):
 
     headers['Referer'] = url
 
-    res = session.post(url='https://yihr.chinasoftinc.com:18010/ehr_saas/web/user/loginByEmpCode.jhtml',
-                       json={'empCode': empCode}, headers=headers, cookies=session.cookies, verify=False)
+    res = session.post(
+        url='https://yihr.chinasoftinc.com:18010/ehr_saas/web/user/loginByEmpCode.jhtml',
+        json={'empCode': empCode}, headers=headers, cookies=session.cookies, verify=False)
     res = json.loads(res.text)
     token = res.get('result').get('data').get('token')
 
@@ -220,7 +224,7 @@ def compute_plan_work_times(plan_work_time: float, daily_work_times: dict, today
     for d in all_workdays:
         if d not in plan_work_times and d > today:
             plan_work_times[d] = plan_work_time
-    print(f'如果以后工作{"%4.1f" % plan_work_time}小时，平均工时为：{round_(sum(plan_work_times.values()) / len(plan_work_times))}')
+    print(f'如果以后工作{"%4.1f" % plan_work_time}小时，平均工时为：{"%7.4f" % round_(sum(plan_work_times.values()) / len(plan_work_times))}')
 
 
 def compute(records):
@@ -234,8 +238,20 @@ def compute(records):
         if r['dt'] not in data:
             data[r['dt']] = []
         data[r['dt']].append(r['checktime'])
-    daily_work_times = {k: work_time(min(v), max(v)) for k, v in data.items()}
-    daily_work_times = {k: v for k, v in daily_work_times.items() if v >= 7 and is_workday(k)}
+    daily_work_times = {}
+    for k, v in data.items():
+        if not is_workday(k):
+            continue
+        start_time = min(v)
+        if start_time[-8:] >= '09:00:00':
+            start_time = start_time[:-8] + ' 08:00:00'
+
+        end_time = max(v)
+
+        daily_work_times[k] = [start_time, end_time]
+
+    daily_work_times = {k: work_time(min(v), max(v)) for k, v in daily_work_times.items()}
+    daily_work_times = {k: v for k, v in daily_work_times.items()}
     total_work_time = sum(v for k, v in daily_work_times.items())
     days_count = len(daily_work_times)
     average_work_time = (total_work_time / days_count) if days_count else None
@@ -261,7 +277,8 @@ def compute(records):
     first_day = datetime.date(int(cur_month[:4]), int(cur_month[-2:]), 1)
     all_workdays = {str(d) for d in (first_day + datetime.timedelta(days=i) for i in range(31)) if
                     is_workday(str(d)) and d.month == int(cur_month[-2:])}
-    exception_data = [(k, v) for k, v in data.items() if min(v)[-8:] > '09:00:00' or max(v)[-8:] < '17:30:00' and today != k]
+    exception_data = [(k, v) for k, v in data.items() if
+                      min(v)[-8:] > '09:00:00' or max(v)[-8:] < '17:30:00' and today != k]
     exception_data += [(d, []) for d in all_workdays if d <= today and d not in data]
     if len(exception_data) > 0:
         print(f'异常打卡：')
@@ -281,13 +298,11 @@ def compute(records):
         print(f'\n如果{to_time[11:]}下班，平均工时：{round_(sum(v for v in daily_work_times.values()) / len(daily_work_times))}')
     print()
     compute_plan_work_times(7, daily_work_times, today, all_workdays)
-    compute_plan_work_times(7+1/12, daily_work_times, today, all_workdays)
-    compute_plan_work_times(7.5, daily_work_times, today, all_workdays)
+    compute_plan_work_times(7 + 1 / 12, daily_work_times, today, all_workdays)
     compute_plan_work_times(8, daily_work_times, today, all_workdays)
     compute_plan_work_times(8.5, daily_work_times, today, all_workdays)
     compute_plan_work_times(9, daily_work_times, today, all_workdays)
     compute_plan_work_times(9.5, daily_work_times, today, all_workdays)
-    compute_plan_work_times(10, daily_work_times, today, all_workdays)
 
     print('*' * 35)
 
@@ -321,7 +336,7 @@ if __name__ == '__main__':
         id = input('初次使用，请输入中软工号(脚本里会记住账号)：')
         save_info('id', id)
     if not pwd:
-        pwd = getpass.getpass('初次使用，请输入密码(脚本里会记住密码)：')
+        pwd = input('初次使用，请输入密码(脚本里会记住密码)：')
         save_info('pwd', pwd)
 
     print(f'当前账号{id}')
@@ -369,4 +384,4 @@ if __name__ == '__main__':
 
         break
 
-    # input('按enter键结束...')
+    input('按enter键结束...')

@@ -4,8 +4,8 @@ from collections import deque
 
 import pygame
 
-MAP_SIZE = (10, 10)
-UNIT_SIZE = 40
+MAP_SIZE = (100, 100)
+UNIT_SIZE = 10
 
 
 class Food:
@@ -41,8 +41,8 @@ class Snake:
                 cur_s.fill(self.body_color)
 
             screen.blit(cur_s, tuple(x * UNIT_SIZE for x in bp))
-            text_surface=score_font.render(f"Score:{len(snake.body_poses)}", False, 'White')
-            screen.blit(text_surface,(UNIT_SIZE,UNIT_SIZE))
+        text_surface=score_font.render(f"Score:{len(snake.body_poses)}", False, 'White')
+        screen.blit(text_surface,(UNIT_SIZE,UNIT_SIZE))
 
     def change_direct(self, keys_pressed):
         if self.direct != (1, 0) and (keys_pressed == pygame.K_LEFT):
@@ -110,5 +110,5 @@ while not_quit:
         pygame.display.flip()
         print(e)
 
-    clock.tick(5)
+    clock.tick(10)
     # time.sleep(1)

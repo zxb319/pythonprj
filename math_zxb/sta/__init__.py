@@ -75,9 +75,5 @@ def C(n: int, m: int):
 
 
 if __name__ == '__main__':
-    a = 3 ** 12 * A(3, 3)
-    b = 3 ** 15
-
-    f = Fraction(a, b)
-
-    print(f)
+    a = C(35, 5)*C(7,2)
+    print(a)

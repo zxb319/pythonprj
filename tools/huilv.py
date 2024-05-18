@@ -1,6 +1,4 @@
 import json
-import threading
-
 import requests
 
 session = requests.Session()
@@ -9,62 +7,58 @@ session = requests.Session()
 def dict_raw_headers(headers_str: str):
     a = headers_str.split('\n')
     a = [x.split(':') for x in a]
-    a = [x for x in a if len(x) == 2]
-    return {x[0].strip(): x[1].strip() for x in a}
+    a = [x for x in a if len(x) >= 2]
+    return {x[0].strip(): ':'.join(x[1:]).strip() for x in a}
 
 
-def get_huilv_per_cny(from_money: str):
+def get_huilvs():
     headers = """
-        Accept: */*
+        Accept: application/vnd.finance-web.v1+json
         Accept-Encoding: gzip, deflate, br
-        Accept-Language: zh-CN,zh;q=0.9,zh-TW;q=0.8,en-US;q=0.7,en;q=0.6
+        Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+        Acs-Token: 1711638121992_1711714212688_FqDbceACq26Z+C6wBwhlWldq2Yh6vgwqi7ynYYrVd3CP5VzzxthjfRRRNO6EHNONO7BxWZFAtWsQeRkQxLDmFiJyTWrUdGMJQesua5AM8QjCpTLp2HhXR7mi3W+hAAY3ksBgq7tBBWMCPOsU2A041lJxrrnO98NLqtTFiaIv8MRxQebyyxR6C2/jvImakpHmUAfsNdS3QXeFKWLaMoy97kkGgWGmtRJbyPgjbUl5StqiS734T4jI3oYWSF+FernPPRhyBDYhq6W8Vjexr3k69cYHmVE+fm8tGhQNsE7wnNnc0mVsJKdeYKJZvCdfJP8hjRykarqQSpUxU8XCDq+Z5mm2ZMu1ZY9gDBsrjkLoiCqRraYZKpmbACXEKAz3mCbG+zRt7JtBzM2+Z4pwE/vAWwtlk6f/C8ys5+b3aH0IFvYn/Iql3dQMO9JBQvi4UGHAZgAv9tGymatMRqsnWbfWGg==
         Connection: keep-alive
-        Cookie: BIDUPSID=FD70D57EE1D64F8599BBDF9C8FCECBD9; PSTM=1603529350; BDUSS=WRZa0xUdzBMbEw3WjNYLWdNMUdNVG10S09TZmhQWH5iRWREME9HUElwdVB4cnhmSVFBQUFBJCQAAAAAAAAAAAEAAACb9qIn1cXQwrKoMzE5NgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI85lV-POZVfd; BDUSS_BFESS=WRZa0xUdzBMbEw3WjNYLWdNMUdNVG10S09TZmhQWH5iRWREME9HUElwdVB4cnhmSVFBQUFBJCQAAAAAAAAAAAEAAACb9qIn1cXQwrKoMzE5NgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI85lV-POZVfd; MCITY=-%3A; BAIDUID=735ED07FC8FA95C5AECF3DB9A50C2BCD:SL=0:NR=10:FG=1; H_PS_PSSID=38515_36550_38687_38881_38793_38817_38839_38636_38847_26350_38570_22159; BAIDUID_BFESS=735ED07FC8FA95C5AECF3DB9A50C2BCD:SL=0:NR=10:FG=1; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598
-        Host: sp0.baidu.com
-        Referer: https://www.baidu.com/s?wd=%E6%B1%87%E7%8E%87%E6%8D%A2%E7%AE%97&rsv_spt=1&rsv_iqid=0xcc20062c00052cc3&issp=1&f=8&rsv_bp=1&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_enter=1&rsv_dl=ib&rsv_n=2&rsv_sug3=1
-        Sec-Fetch-Dest: script
-        Sec-Fetch-Mode: no-cors
+        Cookie: BIDUPSID=3911ED513E5183211F5CCCC4EDB179C3; PSTM=1603528173; BDUSS=hBNFdUUTJ1WnBUTHpxSX5hSHlMMlNoNUdmT2ozSVQ0Smk4aFhXeUlOY0xjSHRpSVFBQUFBJCQAAAAAAAAAAAEAAACb9qIn1cXQwrKoMzE5NgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvjU2IL41NiWW; BDUSS_BFESS=hBNFdUUTJ1WnBUTHpxSX5hSHlMMlNoNUdmT2ozSVQ0Smk4aFhXeUlOY0xjSHRpSVFBQUFBJCQAAAAAAAAAAAEAAACb9qIn1cXQwrKoMzE5NgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvjU2IL41NiWW; BAIDUID=98FE10D3647D999B8C806FFE12CB7BAD:SL=0:NR=10:FG=1; MCITY=-289%3A; H_WISE_SIDS=40080_40304_40376_40416_40446_40464_40459_40457_40317_40510_40398_60044_60033_60046; BAIDUID_BFESS=98FE10D3647D999B8C806FFE12CB7BAD:SL=0:NR=10:FG=1; ZFY=ELhmriCmnOkCrTXldNHZmPxnxTHYnX1kSm8pBmhgyA8:C; H_WISE_SIDS_BFESS=40080_40304_40376_40416_40446_40464_40459_40457_40317_40510_40398_60044_60033_60046; BAIDU_WISE_UID=wapp_1711553705956_306; RT="z=1&dm=baidu.com&si=fa61fe4a-0a43-4dd3-af86-8f61c39051ef&ss=lu9yvu36&sl=6&tt=2dd&bcn=https%3A%2F%2Ffclog.baidu.com%2Flog%2Fweirwood%3Ftype%3Dperf&ld=15m9c&ul=15n5t&hd=15n6p"; H_PS_PSSID=40080_40304_40376_40416_40446_40464_40459_40457_40510_40398_60044_60033_60046; BA_HECTOR=25ala580008g2g840h048la4sqqbeo1j0dbs81s; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598; BDRCVFR[feWj1Vr5u3D]=I67x6TjHwwYf0; PSINO=5; delPer=0; ab_sr=1.0.1_NjkwY2U2ZGVhZDYwMDVmOTRhNTM1MDMzOThhY2ZhYmJhNGU2N2ExZDJjNjZkYTJlNzI4OWE5M2YwYjNlZDE5ZmI4MGExYTljZTcxYmMzNjU4Mzc2M2E3OGU3NTVkOGM4NWExMjg5NTg4ZmY1OTQ2YjE3YWY0ODUyOTRjMmYyMTAxOTAyNWJjYjlmY2E2YmE4ZDRkZWFmZmI5M2VmNmIxMmZlNzAxNTMwYjAxNmRhNzJkMjRmNDg2YjkxZmYwZGFhYTM0ZjhmYzY5YzE5OTAxYTZlMjA2ZDdmZmFlZTExOGI=
+        Host: finance.pae.baidu.com
+        Origin: https://gushitong.baidu.com
+        Referer: https://gushitong.baidu.com/
+        Sec-Fetch-Dest: empty
+        Sec-Fetch-Mode: cors
         Sec-Fetch-Site: same-site
-        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
-        sec-ch-ua: "Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0
+        sec-ch-ua: "Chromium";v="122", "Not(A:Brand";v="24", "Microsoft Edge";v="122"
         sec-ch-ua-mobile: ?0
         sec-ch-ua-platform: "Windows"
     """
-    url = rf'https://sp0.baidu.com/5LMDcjW6BwF3otqbppnN2DJv/finance.pae.baidu.com/vapi/async?from_money={from_money}&to_money=%E4%BA%BA%E6%B0%91%E5%B8%81&from_money_num=1&srcid=5293&sid=38515_36550_38687_38881_38793_38817_38839_38636_38847_26350_38570_22159&cb=jsonp_1687620006779_2476'
+
     headers = dict_raw_headers(headers)
+    page_no = 0
+    res = []
+    while True:
+        url = rf'https://finance.pae.baidu.com/api/getforeignrank?pn={page_no}&rn=100&type=rmb&finClientType=pc'
+        resp = session.get(url, headers=headers)
+        cur = json.loads(resp.content)
+        cur = cur['Result']
+        res.extend(cur)
+        if len(cur) < 100:
+            break
+        page_no += 100
 
-    resp = session.get(url, headers=headers)
+    ret = []
+    for r in res:
+        cur = {'name': r['name'][3:]}
+        for x in r['list']:
+            if x['text'] == '最新价':
+                v = float(x['value'])
+                cur['value'] = 1 / v if v else None
+                if v and v > 1:
+                    cur['1元人民币能兑换'] = v
 
-    res = json.loads(resp.text[len('jsonp_1687620006779_2476('):-1])
-    return float(res['Result'][0]['DisplayData']['resultData']['tplData']['money2_num'])
+        ret.append(cur)
+    return sorted((r for r in ret if r['value'] is not None), key=lambda x: x['value'], reverse=True)
 
-
-MONEYS = [
-    '日元', '英镑', '港元', '加元', '美元', '欧元', '韩元', '澳元', '缅甸元', '澳门元', '俄罗斯卢布', '泰铢',
-]
 
 if __name__ == '__main__':
-    import dsa.run_time
-
-    with dsa.run_time.CostTime() as a:
-        from concurrent.futures import ThreadPoolExecutor
-
-        thread_pool = ThreadPoolExecutor(len(MONEYS))
-        res = [(m, thread_pool.submit(get_huilv_per_cny, m)) for m in MONEYS]
-        thread_pool.shutdown()
-        res = [(m[0], m[1].result()) for m in res]
-        res = sorted(res, key=lambda x: x[1], reverse=True)
-        for m, n in res:
-            print(m, n, f'1人民币=={round(1 / n, 2)}{m}', sep='\t' * 3)
-
-    # with dsa.run_time.CostTime() as a:
-    #     import gevent
-    #     from gevent import monkey
-    #     monkey.patch_all()
-    #
-    #     res2 = [gevent.spawn(get_huilv_per_cny,m) for m in MONEYS]
-    #     gevent.joinall(res2)
-    #     res = [(m[0], m[1].value) for m in zip(MONEYS,res2)]
-    #     res = sorted(res, key=lambda x: x[1], reverse=True)
-    #     for m, n in res:
-    #         print(m, n, f'1人民币=={round(1 / n, 2)}{m}', sep='\t' * 3)
+    rrr = get_huilvs()
+    print(*enumerate(rrr), sep='\n')
+    # lI1o0O

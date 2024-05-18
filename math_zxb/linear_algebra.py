@@ -178,26 +178,11 @@ class Matrix:
 
 if __name__ == '__main__':
     a = Matrix([
-        [1, 1, ],
-        [4, 2, ],
+        [0.98, 0.02, ],
+        [1, 0],
     ])
-
-    N = 2
-    a = []
-    for i in range(N):
-        a.append([random.random()*2 for j in range(N)])
-    a = Matrix(a)
-
-    from dsa.run_time import CostTime
-
-    with CostTime():
-        ai = a.inverse
-
-    print(ai)
+    for i in range(20):
+        a = a * a
     print(a)
-    print(a * ai)
 
-    # print(a.inverse*Matrix([
-    #     [15],
-    #     [52],
-    # ]))
+    print(50 / 53, 3 / 53)

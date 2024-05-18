@@ -16,7 +16,8 @@ class EnIterable:
     def __firstn(self, n: int):
         for i, x in enumerate(self):
             yield x
-            if i == n - 1: break
+            if i == n - 1:
+                break
 
     def take(self, n: int) -> "EnIterable":
         return EnIterable(self.__firstn(n))
@@ -36,3 +37,7 @@ class EnIterable:
 
     def __iter__(self):
         return (x for x in self.__inputs)
+
+
+if __name__ == '__main__':
+    pass

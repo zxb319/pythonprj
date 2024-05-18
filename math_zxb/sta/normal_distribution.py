@@ -11,7 +11,8 @@ class NormalDistribution(Dist):
         self._sigma = sigma
 
         def func(x: float):
-            return 1 / (2 * math.pi) ** 0.5 / self._sigma * math.e ** (-(x - self._miu) ** 2 / 2 / self._sigma ** 2)
+            return (1 / (2 * math.pi) ** 0.5 / self._sigma
+                    * math.e ** (-(x - self._miu) ** 2 / 2 / self._sigma ** 2))
 
         self._df = func
 
@@ -32,7 +33,9 @@ class NormalDistribution(Dist):
     def x_of(self, p: float):
         assert 0 < p < 1
 
-        return math_zxb.root_binarily(lambda x: self.cp(x) - p, self._miu - 100 * self._sigma, self._miu + 100 * self._sigma)
+        return math_zxb.root_binarily(lambda x: self.cp(x) - p,
+                                      self._miu - 100 * self._sigma,
+                                      self._miu + 100 * self._sigma)
 
     def range_of(self, p: float = 0.95):
         assert 0 < p < 1
@@ -51,5 +54,6 @@ class NormalDistribution(Dist):
 
 
 if __name__ == '__main__':
-    pd = NormalDistribution(0, 1)
-    print(pd.x_of(0.95))
+    print((30/10000/50)**0.5)
+    print()
+

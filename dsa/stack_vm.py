@@ -5,7 +5,7 @@ from typing import Callable, List, Tuple
 
 class StackVM:
     REGs: List[Tuple[Pattern, Callable]] = [
-        (re.compile(r'\s*push\s+([\d]+)\s*', re.IGNORECASE), lambda m, s: s._push(int(m.group(1)))),
+        (re.compile(r'\s*push\s+([\d.+\-]+)\s*', re.IGNORECASE), lambda m, s: s._push(float(m.group(1)))),
         (re.compile(r'\s*pop\s*', re.IGNORECASE), lambda m, s: s._pop()),
         (re.compile(r'\s*add\s*', re.IGNORECASE), lambda m, s: s._alu_op('+')),
         (re.compile(r'\s*sub\s*', re.IGNORECASE), lambda m, s: s._alu_op('-')),

@@ -20,75 +20,75 @@ class Token:
         return self.__str__()
 
     class Type(enum.Enum):
-        IDN = 1
+        IDN = 'idn'
 
-        INT = 2
-        FLOAT = 3
-        STR = 4
+        INT = 'int'
+        FLOAT = 'float'
+        STR = 'str'
 
-        ADD = 5
-        SUB = 6
-        MUL = 7
-        DIV = 8
-        FLOOR_DIV = 9
-        MOD = 10
-        POW = 11
+        ADD = 'add'
+        SUB = 'sub'
+        MUL = 'mul'
+        DIV = 'div'
+        FLOOR_DIV = 'floor_div'
+        MOD = 'mod'
+        POW = 'pow'
 
-        EQ = 12
-        NE = 13
-        GT = 14
-        GE = 15
-        LT = 16
-        LE = 17
+        EQ = 'eq'
+        NE = 'ne'
+        GT = 'gt'
+        GE = 'ge'
+        LT = 'lt'
+        LE = 'le'
 
-        LP = 18
-        RP = 19
-        LZ = 20
-        RZ = 21
-        LD = 22
-        RD = 23
+        LP = 'lp'
+        RP = 'rp'
+        LZ = 'lz'
+        RZ = 'rz'
+        LD = 'ld'
+        RD = 'rd'
 
-        ASSIGN = 24
+        ASSIGN = 'assign'
 
-        COMMA = 25
-        COLON = 26
-        POINT = 27
-        AT = 28
+        COMMA = 'comma'
+        COLON = 'colon'
+        POINT = 'point'
+        AT = 'at'
 
-        NOT = 29
-        AND = 30
-        OR = 31
+        NOT = 'not'
+        AND = 'and'
+        OR = 'or'
 
-        IF = 32
-        ELIF = 33
-        ELSE = 34
+        IF = 'if'
+        ELIF = 'elif'
+        ELSE = 'else'
 
-        WHILE = 35
-        FOR = 36
-        IN = 37
+        WHILE = 'while'
+        FOR = 'for'
+        IN = 'in'
 
-        WITH = 38
-        AS = 39
+        WITH = 'with'
+        AS = 'as'
 
-        TRY = 40
-        EXCEPT = 41
-        FINALLY = 42
+        TRY = 'try'
+        EXCEPT = 'except'
+        FINALLY = 'finally'
 
-        COMMENT = 43
-        WHITE = 44
+        COMMENT = 'comment'
+        WHITE = 'white'
 
-        FROM = 45
-        IMPORT = 46
+        FROM = 'from'
+        IMPORT = 'import'
 
-        DEF = 47
-        CLASS = 48
+        DEF = 'def'
+        CLASS = 'class'
 
-        BACK_SLASH = 49
+        BACK_SLASH = 'back_slash'
 
-        NONE = 50
+        NONE = 'none'
 
-        TRUE = 51
-        FALSE = 52
+        TRUE = 'true'
+        FALSE = 'false'
 
     KEYs = {
         'not': Type.NOT,

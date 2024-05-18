@@ -20,6 +20,7 @@ class CostTime:
     """用with代码块打印代码块的执行时间"""
 
     def __enter__(self):
+        print(rf'代码块开始执行...')
         self.start_time = time.time()
         return self
 
@@ -30,9 +31,7 @@ class CostTime:
 if __name__ == '__main__':
     # @run_time
     def ttt():
-        sum(1 for i in range(10 ** 8))
-        return 1
-
+        return sum(i for i in range(10 ** 8))
 
     with CostTime():
-        ttt()
+        print(ttt())

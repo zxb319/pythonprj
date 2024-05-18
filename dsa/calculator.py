@@ -3,10 +3,29 @@ import math
 import re
 
 
+class Token:
+    class Type:
+        NUM = 'NUM'
+        VAR = 'VAR'
+        ADD = 'ADD'
+        SUB = 'SUB'
+        MUL = 'MUL'
+        DIV = 'DIV'
+        POW = 'POW'
+        LP = 'LP'
+        RP = 'RP'
+
+    def __init__(self, typ, val):
+        self.typ = typ
+        self.val = val
+
+    def __str__(self):
+        return rf'<{self.typ}:{self.val}>'
+
+
 def get_tokens(s: str):
     regs = [
-        r'^\d+\.?(\d+)?(e[+\-]?\d+)?',
-        r'^\.\d+(e[+\-]?\d+)?',
+
         r'^\+',
         r'^\-',
         r'^\^\^',
@@ -17,6 +36,19 @@ def get_tokens(s: str):
         r'^\s+',
         r'^[_a-z]+[_a-z0-9]*',
         r'^,',
+    ]
+
+    regs=[
+        (Token.Type.NUM,r'^\d+\.?(\d+)?(e[+\-]?\d+)?'),
+        (Token.Type.NUM,r'^\.\d+(e[+\-]?\d+)?',),
+        (Token.Type.ADD),
+        (Token.Type.ADD),
+        (Token.Type.ADD),
+        (Token.Type.ADD),
+        (Token.Type.ADD),
+        (Token.Type.ADD),
+        (Token.Type.ADD),
+        (Token.Type.ADD),
     ]
 
     while s:
@@ -93,9 +125,9 @@ class FuncCall:
         if not f:
             raise ArithmeticError(rf'不支持：{func_name}！')
 
-        args=[a.value for a in args]
+        args = [a.value for a in args]
         try:
-            r=f(*args)
+            r = f(*args)
         except Exception as e:
             raise ArithmeticError(rf'报错：{func_name}({",".join(str(ar) for ar in args)}) : {e}')
 
@@ -327,7 +359,7 @@ def get_expr(tks):
 
 
 if __name__ == '__main__':
-    expr_s=r'''
+    expr_s = r'''
         log(2,-log(e(),e()^^(-8)))
     '''
     tokens = list(get_tokens(expr_s.strip()))
@@ -336,4 +368,3 @@ if __name__ == '__main__':
     # print(*globals().items(),sep='\n')
     a = get_expr(tks=tokens)
     print(a.value)
-
