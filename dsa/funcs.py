@@ -27,13 +27,23 @@ def lcm(a: int, b: int):
     return a // gcd(a, b) * b
 
 
-def wander_files(dir: str, depth: int):
-    files = os.listdir(dir)
-    for f in files:
-        file = os.path.join(dir, f)
-        print(f'{"    " * depth}{f}')
-        if os.path.isdir(file):
-            wander_files(file, depth + 1)
+def wander_files(path: str):
+    if not os.path.exists(path):
+        raise Exception(rf'path: {path} do not exists.')
+    cur={
+        'name':os.path.basename(path),
+        'size':os.stat(path).st_size,
+        'children':None
+    }
+    if os.path.isdir(path):
+        cur['children']=[]
+        cur['size']=0
+        for cname in os.listdir(path):
+            cur_child=wander_files(os.path.join(path,cname))
+            cur['children'].append(cur_child)
+            cur['size']+=cur_child['size']
+
+    return cur
 
 
 def gcd(a: int, b: int) -> int:
@@ -68,5 +78,6 @@ def isPrime(num: int) -> bool:
 
 
 if __name__ == "__main__":
-    r = lcm(12, 8)
-    print(r)
+    files=wander_files(r'd:\weiyun\pythonprj\dsa')
+    import json
+    print(json.dumps(files))
