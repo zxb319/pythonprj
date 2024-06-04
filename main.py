@@ -14,10 +14,14 @@ def create_app():
 
 
 if __name__ == '__main__':
-    from app.apis.general import general
 
     app = create_app()
+    from app.apis.general import general
     app.register_blueprint(general)
+
+    from app.apis.user import user_bp
+    app.register_blueprint(user_bp)
+
     from app import tools
 
     tools.register_before_handle(app)

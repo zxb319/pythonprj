@@ -1,7 +1,12 @@
+import datetime
 import time
 import traceback
 
+import jwt
+
 from flask import jsonify, request, Flask
+
+import config
 from app.model import db, ErrorLog
 
 
@@ -114,3 +119,29 @@ _err_handle_map = {
 def register_err_handles(app: Flask):
     for e, h in _err_handle_map.items():
         app.register_error_handler(e, h)
+
+
+def encode_token(payload):
+    now = datetime.datetime.utcnow()
+    payload = {
+        'iat': now,
+        'exp': now + datetime.timedelta(seconds=config.Config.JWT_EXP_SECS),
+        'data': payload
+    }
+    return jwt.encode(payload, config.Config.JWT_KEY, algorithm='HS256')
+
+
+def decode_token(token):
+    return jwt.decode(token, config.Config.JWT_KEY, algorithms='HS256')
+
+
+def check_login(func):
+    def inner(*args, **kwargs):
+        tk = request.headers.get('Authorization', '')
+        try:
+            request.decoded_token = decode_token(tk)
+            return func(*args, **kwargs)
+        except Exception as e:
+            raise LoginErr(e)
+
+    return inner

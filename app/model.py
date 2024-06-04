@@ -21,9 +21,12 @@ class Shici(db.Model):
     content = db.Column(db.Text)
 
 
-def create_table():
-    db.create_all(bind_key=None)
-
-
-if __name__ == '__main__':
-    create_table()
+class User(db.Model):
+    __tablename__ = 'user'
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(32))
+    user_name = db.Column(db.String(32))
+    pwd = db.Column(db.String(32))
+    pwd_salt = db.Column(db.String(32))
+    email = db.Column(db.String(32))
+    phone = db.Column(db.String(32))

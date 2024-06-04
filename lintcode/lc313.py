@@ -1,6 +1,10 @@
-import re
 
-s = '1234567890'
-mat = re.search(r'^\d+$', s)
+import hashlib
 
-print(mat)
+a=hashlib.md5(rf'zzz'.encode()).hexdigest()
+
+print(a)
+
+a=hashlib.md5(rf'zxb'.encode()).hexdigest()
+
+print(a,len(a))

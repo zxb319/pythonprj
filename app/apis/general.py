@@ -33,6 +33,7 @@ def tool_env():
 
 
 @general.route('/shicis/', methods=['GET'])
+@tools.check_login
 def get_shicis():
     cur_page, page_size = tools.get_page_info()
     key_word = tools.get_arg('key_word', necessary=False)
