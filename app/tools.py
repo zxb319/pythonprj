@@ -139,7 +139,7 @@ def check_login(func):
     def inner(*args, **kwargs):
         tk = request.headers.get('Authorization', '')
         if not tk:
-            raise ArgsErr(rf'no token')
+            raise ArgsErr(rf'request has no token')
         try:
             request.decoded_token = decode_token(tk)
             return func(*args, **kwargs)
