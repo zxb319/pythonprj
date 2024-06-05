@@ -142,6 +142,7 @@ def check_login(func):
             raise ArgsErr(rf'request has no token')
         try:
             request.decoded_token = decode_token(tk)
+            print(rf'user_info: {request.decoded_token}')
             return func(*args, **kwargs)
         except Exception as e:
             raise LoginErr(e)
