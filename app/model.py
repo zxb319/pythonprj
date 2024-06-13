@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
+def get_cols(model:db.Model):
+    return set(x for x in model.__dict__ if not x.startswith('_') and x!='id')
+
 class ErrorLog(db.Model):
     __tablename__ = 'error_log'
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
@@ -30,3 +33,11 @@ class User(db.Model):
     pwd_salt = db.Column(db.String(32))
     email = db.Column(db.String(32))
     phone = db.Column(db.String(32))
+
+
+class EmailCheckCode(db.Model):
+    __tablename__ = 'email_check_code'
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(32))
+    check_code = db.Column(db.String(32))
+    expired_time = db.Column(db.String(32))

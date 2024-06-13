@@ -3,6 +3,7 @@ import threading
 
 import waitress as waitress
 from flask import Flask
+from flask_cors import CORS
 from app.model import db
 
 
@@ -10,6 +11,7 @@ def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = rf'mysql+pymysql://root:zxb319@localhost/shici'
     db.init_app(app)
+    CORS(app)
     return app
 
 
@@ -21,6 +23,9 @@ if __name__ == '__main__':
 
     from app.apis.user import user_bp
     app.register_blueprint(user_bp)
+
+    from app.apis.shici import shici_bp
+    app.register_blueprint(shici_bp)
 
     from app import tools
 
