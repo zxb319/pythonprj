@@ -1,7 +1,0 @@
-
-class ArgsError(Exception):
-    pass
-
-
-
-

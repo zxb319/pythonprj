@@ -1,4 +1,5 @@
 import datetime
+import functools
 import time
 import traceback
 
@@ -136,12 +137,14 @@ def decode_token(token):
 
 
 def check_login(func):
+    @functools.wraps(func)
     def inner(*args, **kwargs):
         tk = request.headers.get('Authorization', '')
         if not tk:
             raise ArgsErr(rf'request has no token')
         try:
             request.decoded_token = decode_token(tk)
+            print(rf'user_info: {request.decoded_token}')
             return func(*args, **kwargs)
         except Exception as e:
             raise LoginErr(e)
