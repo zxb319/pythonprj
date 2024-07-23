@@ -1,10 +1,11 @@
+import pandas as pd
 
-import hashlib
+df = pd.DataFrame(data={
+    'a': [1, pd.NA, 3],
+    'b': ['q', 'w', 'e']
+})
 
-a=hashlib.md5(rf'zzz'.encode()).hexdigest()
+df['c'] = df.apply(lambda x: x['b'] if pd.isna(x['a']) else x['b'] * 2, axis=1)
 
-print(a)
 
-a=hashlib.md5(rf'zxb'.encode()).hexdigest()
-
-print(a,len(a))
+df.groupby(by='').apply()

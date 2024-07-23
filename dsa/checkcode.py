@@ -20,12 +20,15 @@ def checkdeImage(width: int, height: int, checkcode: str):
         draw.line((randomXy(width, height), randomXy(width, height)), fill=randomColor())
 
     for i, c in enumerate(checkcode):
-        draw.text((5 + i * width // (len(checkcode) + 1), 10), c,
-                  fill=randomColor(), font=ImageFont.truetype('arial.ttf', 30))
+        draw.text((10 + i * width // (len(checkcode) + 1), 10), c,
+                  fill=randomColor(), font=ImageFont.truetype('arial.ttf', 50))
 
     return img
 
 
 if __name__ == '__main__':
-    im = checkdeImage(150, 50, "054410")
+    import random
+    s='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    code=''.join([s[random.randint(0,len(s)-1)] for i in range(6)])
+    im = checkdeImage(200, 70, code)
     im.show()
