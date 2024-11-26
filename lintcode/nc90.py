@@ -1,10 +1,11 @@
+def fib(n):
+    if n in (0, 1):
+        return n
 
+    r = fib(n - 1) + fib(n - 2)
+    print(n, r)
+    return r
 
-class AA:
-    def __init__(self):
-        self.a=1
-        self.b=2
 
 if __name__ == '__main__':
-    a=AA()
-    print(a.__dir__())
+    print(fib(11))

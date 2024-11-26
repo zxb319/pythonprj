@@ -41,3 +41,5 @@ class EmailCheckCode(db.Model):
     email = db.Column(db.String(32))
     check_code = db.Column(db.String(32))
     expired_time = db.Column(db.String(32))
+
+

@@ -4,7 +4,7 @@ from collections import deque
 
 import pygame
 
-MAP_SIZE = (100, 100)
+MAP_SIZE = (50, 50)
 UNIT_SIZE = 10
 
 

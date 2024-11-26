@@ -1,5 +1,6 @@
 import os
 import threading
+import time
 
 import waitress as waitress
 from flask import Flask
@@ -15,8 +16,7 @@ def create_app():
     return app
 
 
-if __name__ == '__main__':
-
+def main():
     app = create_app()
     from app.apis.general import general
     app.register_blueprint(general)
@@ -33,4 +33,12 @@ if __name__ == '__main__':
     tools.register_err_handles(app)
     # threading.Thread(target=lambda :os.system('wssh -port=9999')).start()
     print('服务已启动')
-    waitress.serve(app, port=8888)
+    waitress.serve(app, port=55555)
+
+
+if __name__ == '__main__':
+    threading.Thread(target=main).start()
+    time.sleep(1)
+    import webbrowser
+
+    webbrowser.open('http://localhost:55555/fs')

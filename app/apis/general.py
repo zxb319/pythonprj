@@ -6,7 +6,7 @@ import re
 import time
 
 import requests
-from flask import Blueprint, Response, send_file, redirect, url_for, make_response
+from flask import Blueprint, Response, send_file, redirect, url_for, make_response, request, jsonify
 from sqlalchemy import or_
 
 from app import tools
@@ -20,6 +20,39 @@ general = Blueprint('general', url_prefix='/', import_name=__name__)
 @general.route('/heartbeat', methods=['GET'])
 def heartbeat():
     return tools.json_response(data='server running normal!')
+
+
+@general.route('/index', methods=['GET'])
+def index():
+    return tools.json_response(data=list(rf'{k}:{v}' for k, v in request.environ.items()))
+
+
+@general.route('/upload_img', methods=['POST'])
+def upload_img():
+    import uuid
+    dir_path = r'D:\weiyun\htmlprj'
+    img_fn = rf'{uuid.uuid1().hex}.png'
+    file = list(request.files.values())[0]
+    file.save(os.path.join(dir_path, img_fn))
+
+    return jsonify({
+        "errno": 0,
+        "data": {
+            "url": rf"/img?fn={img_fn}"
+        }
+    })
+
+
+@general.route('/img', methods=['get'])
+def get_img():
+    dir_path = r'D:\weiyun\htmlprj'
+    fn = tools.get_arg('fn')
+    return send_file(os.path.join(dir_path, fn))
+
+
+@general.route('/wang', methods=['get'])
+def get_wang():
+    return send_file(r'D:\weiyun\htmlprj\index.html')
 
 
 ROOT_MAP = {

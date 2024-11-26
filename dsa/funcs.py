@@ -30,18 +30,18 @@ def lcm(a: int, b: int):
 def wander_files(path: str):
     if not os.path.exists(path):
         raise Exception(rf'path: {path} do not exists.')
-    cur={
-        'name':os.path.basename(path),
-        'size':os.stat(path).st_size,
-        'children':None
+    cur = {
+        'name': os.path.basename(path),
+        'size': os.stat(path).st_size,
+        'children': None
     }
     if os.path.isdir(path):
-        cur['children']=[]
-        cur['size']=0
+        cur['children'] = []
+        cur['size'] = 0
         for cname in os.listdir(path):
-            cur_child=wander_files(os.path.join(path,cname))
+            cur_child = wander_files(os.path.join(path, cname))
             cur['children'].append(cur_child)
-            cur['size']+=cur_child['size']
+            cur['size'] += cur_child['size']
 
     return cur
 
@@ -77,7 +77,31 @@ def isPrime(num: int) -> bool:
     return True
 
 
+def excel_col_str_to_num(col_str):
+    def c_to_num(c: str):
+        return ord(c) - ord('A') + 1
+
+    return sum(c_to_num(c) * 26 ** i for i, c in enumerate(reversed(col_str)))
+
+
+def num_to_excel_col_str(num: int):
+    def _chr(n: int):
+        return chr(ord('A') + n - 1)
+
+    def inner(nn: int):
+
+        if nn <= 0:
+            return ''
+        elif nn % 26 == 0:
+            return inner((nn - 26) // 26) + 'Z'
+        else:
+            return inner(nn // 26) + _chr(nn % 26)
+
+    return inner(num)
+
+
 if __name__ == "__main__":
-    files=wander_files(r'd:\weiyun\pythonprj\dsa')
-    import json
-    print(json.dumps(files))
+    a = num_to_excel_col_str(16384)
+    print(a)
+    b = excel_col_str_to_num(a)
+    print(b)
