@@ -41,4 +41,4 @@ if __name__ == '__main__':
     time.sleep(1)
     import webbrowser
 
-    webbrowser.open('http://localhost:55555/fs')
+    webbrowser.open('http://localhost:55555/')

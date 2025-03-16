@@ -22,9 +22,11 @@ def heartbeat():
     return tools.json_response(data='server running normal!')
 
 
-@general.route('/index', methods=['GET'])
+@general.route('/', methods=['GET'])
 def index():
-    return tools.json_response(data=list(rf'{k}:{v}' for k, v in request.environ.items()))
+    return tools.json_response(data={
+        k:str(v) for k,v in request.environ.items()
+    })
 
 
 @general.route('/upload_img', methods=['POST'])
