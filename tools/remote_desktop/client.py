@@ -77,7 +77,7 @@ class Client:
 
                 panel = ttk.Label(tab)
                 pil_image = Image.open(io.BytesIO(screen_data))
-                pil_image.thumbnail((root.winfo_width(),root.winfo_height()))
+                pil_image.thumbnail((notebook.winfo_width(),notebook.winfo_height()))
                 img = ImageTk.PhotoImage(pil_image)
                 panel.image = img
                 panel.pack(side="bottom", fill="both")
@@ -87,6 +87,7 @@ class Client:
                 screen_data_list = []
                 data_len = recv_all(sock, 4)
                 data = recv_all(sock, struct.unpack('<i', data_len)[0])
+                print(len(data)/1024//1024)
                 bio = io.BytesIO(data)
                 while bio.tell() < len(data):
                     cur = pickle.load(bio)
@@ -95,7 +96,7 @@ class Client:
                 for i, screen_data in enumerate(screen_data_list):
                     panel = labels[i]
                     pil_image = Image.open(io.BytesIO(screen_data))
-                    pil_image.thumbnail((root.winfo_width(),root.winfo_height()))
+                    pil_image.thumbnail((notebook.winfo_width(),notebook.winfo_height()))
                     img = ImageTk.PhotoImage(pil_image)
                     panel.config(image=img)
                     panel.image = img
@@ -109,5 +110,5 @@ class Client:
 
 if __name__ == '__main__':
     c = Client()
-    c.start('127.0.0.1', 5900)
+    c.start('zxb-shinelon-m7', 5900)
     # c.connect('127.0.0.1',5900)

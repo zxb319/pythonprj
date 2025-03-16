@@ -3,8 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-def get_cols(model:db.Model):
-    return set(x for x in model.__dict__ if not x.startswith('_') and x!='id')
+def get_cols(model: db.Model):
+    return set(x for x in model.__dict__ if not x.startswith('_') and x != 'id')
+
 
 class ErrorLog(db.Model):
     __tablename__ = 'error_log'
@@ -41,5 +42,3 @@ class EmailCheckCode(db.Model):
     email = db.Column(db.String(32))
     check_code = db.Column(db.String(32))
     expired_time = db.Column(db.String(32))
-
-
