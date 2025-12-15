@@ -53,13 +53,13 @@ def modify_building_product_count(file_path, to_path):
                 reg = r'^.*<UnEducated>([0-9]+)</UnEducated>.*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), bigger(2))
+                    line = modify(line, mat.group(1), bigger(100))
                     modified_count += 1
 
                 reg = r'^.*<Educated>([0-9]+)</Educated>.*$'
                 mat = re.search(reg, line, re.IGNORECASE)
                 if mat:
-                    line = modify(line, mat.group(1), bigger(2))
+                    line = modify(line, mat.group(1), bigger(100))
                     modified_count += 1
 
             reg = r'^.*</Goods>.*$'
@@ -71,7 +71,7 @@ def modify_building_product_count(file_path, to_path):
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
                 # print(line)
-                line = modify(line, mat.group(1), bigger(10))
+                line = modify(line, mat.group(1), bigger(100))
                 modified_count += 1
                 print(line)
 
@@ -93,7 +93,7 @@ def modify_building_product_count(file_path, to_path):
             mat = re.search(reg, line, re.IGNORECASE)
             if mat:
                 # print(line)
-                line = modify(line, mat.group(1), bigger(0))
+                line = modify(line, mat.group(1), bigger(100))
                 modified_count += 1
 
             # reg = r'^.*<StorageLimit>([0-9]+)</StorageLimit>.*$'

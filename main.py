@@ -33,12 +33,8 @@ def main():
     tools.register_err_handles(app)
     # threading.Thread(target=lambda :os.system('wssh -port=9999')).start()
     print('服务已启动')
-    waitress.serve(app, port=55555)
+    waitress.serve(app, port=9999)
 
 
 if __name__ == '__main__':
-    threading.Thread(target=main).start()
-    time.sleep(1)
-    import webbrowser
-
-    webbrowser.open('http://localhost:55555/fs')
+    main()
