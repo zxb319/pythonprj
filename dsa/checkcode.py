@@ -30,5 +30,6 @@ if __name__ == '__main__':
     import random
     s='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     code=''.join([s[random.randint(0,len(s)-1)] for i in range(6)])
-    im = checkdeImage(200, 70, code)
+    print(code)
+    im = checkdeImage(200, 100, code)
     im.show()

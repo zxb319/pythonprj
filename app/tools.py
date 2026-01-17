@@ -49,7 +49,7 @@ def json_response(data=None, resp_code=RespCode.SUCCESS, msg='SUCCESS'):
 
 def register_before_handle(app: Flask):
     @app.before_request
-    def func():
+    def before_request_func():
         print(rf'{datetime.datetime.now()} {request.host} accessing {request.url}')
         request.start_time = time.time()
         content_type = request.content_type
@@ -71,6 +71,10 @@ def register_before_handle(app: Flask):
         elif 'form-data' in content_type:
             request.all_args.update(request.files)
             request.all_args.update(request.form)
+
+    @app.teardown_request
+    def teardown_request_func(exception):
+        db.session.remove()
 
         # print(request.all_args)
 

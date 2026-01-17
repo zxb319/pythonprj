@@ -141,4 +141,10 @@ def debj(present_value: float, r: float, n: int):
 
 
 if __name__ == '__main__':
-    print(*debx(10000, 10 / 100 / 2, 10 * 2), sep='\n')
+    # r=irr([-6299,]+[1081.14]*6)
+    # print(r*12)
+
+    r = irr([-95, 100])
+    print(r)
+    r = irr([-97,5, 105])
+    print(r)

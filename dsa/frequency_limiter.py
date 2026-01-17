@@ -13,7 +13,10 @@ def frequency_limit(secs: int, times: int):
             self._recent_called_times = FixedLenQueue(self._times)
 
         def __call__(self, *args, **kwargs):
-            while len(self._recent_called_times) == self._times and self._recent_called_times.head() + self._secs >= time.time():
+            while (
+                    len(self._recent_called_times) == self._times
+                    and self._recent_called_times.head() + self._secs >= time.time()
+            ):
                 time.sleep(1)
 
             res = self._callable_object(*args, **kwargs)

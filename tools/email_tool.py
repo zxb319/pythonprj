@@ -4,7 +4,7 @@ from email.mime.text import MIMEText  # 往邮件中写内容的对象
 
 from email.utils import formataddr  # 发件人信息
 
-from tools.mima import EmailConfig
+from mima import EmailConfig
 
 
 def send_email(subject: str, content: str, receivers: list, cc: list = None, bcc: list = None):
@@ -27,6 +27,7 @@ def send_email(subject: str, content: str, receivers: list, cc: list = None, bcc
     all_receivers = list(set(all_receivers))
 
     s.sendmail(EmailConfig.ADDR, all_receivers, msg.as_string())
+    s.quit()
 
 
 if __name__ == '__main__':
